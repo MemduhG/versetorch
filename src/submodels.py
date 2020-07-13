@@ -2,7 +2,6 @@ import torch
 from torch import nn
 from posn import PositionalEncoding
 from utils import get_tokenizer
-from torchtext.data import Field, Dataset
 
 
 class TransformerModel(nn.Module):
@@ -38,24 +37,26 @@ class TransformerModel(nn.Module):
         :param max_len: max length of the generator
         :return: predicted text
         """
-        src_input = self.tokenize_string(src)
+        src_input = torch.LongTensor(self.tokenize_string(src))
 
-        src_tensor = torch.LongTensor(src_input).unsqueeze(1).cuda()
+        src_tensor = self.embedding(torch.LongTensor(src_input)).unsqueeze(1)
+
+        print(src_tensor)
         memory = self.transformer.encoder(src_tensor)
 
         tgt_input = [self.start_symbol]
 
         for i in range(max_len):
-            tgt_tensor = torch.LongTensor(tgt_input).unsqueeze(1).cuda()
+            tgt_tensor = self.embedding(torch.LongTensor(tgt_input)).unsqueeze(1)
 
-            decoder_out = self.transformer.decoder(tgt_tensor, memory, src_pad_mask)
+            decoder_out = self.transformer.decoder(tgt_tensor, memory)
             tokens_out = self.vocab_out(decoder_out)
             out_token = tokens_out.argmax(2)[-1].item()
             tgt_input.append(out_token)
             if out_token == self.end_symbol:
                 break
 
-        return self.detokenize_string(tgt_input)
+        return self.decode_string(tgt_input)
 
     def batch_generator(self, text_file, batch_size=32):
         with open(text_file, encoding="utf-8") as infile:
@@ -76,3 +77,5 @@ if __name__ == "__main__":
     print(masks.shape, tensor.shape)
     f = model.forward(tensor, tensor, src_key_mask=masks)
     print(f)
+    decoded = model.predict_inference_src("Merhaba gurbet.", max_len=128)
+    print(decoded)

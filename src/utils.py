@@ -1,5 +1,4 @@
 import sentencepiece as spm
-import torchtext as txt
 
 tokenizer_data_files = {"tr": "data/spm/tr.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model"}
