@@ -11,8 +11,8 @@ class TransformerModel(nn.Module):
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead, num_encoder_layers=num_encoder_layers,
                                           num_decoder_layers=num_decoder_layers, dim_feedforward=dim_feedforward,
                                           dropout=dropout)
-        self.config_string = "-".join(str(x) for x in[d_model, nhead, num_encoder_layers, num_decoder_layers,
-                                                      dim_feedforward, dropout, vocab_size, tokenizer])
+        self.config_string = "-".join(str(x) for x in [d_model, nhead, num_encoder_layers, num_decoder_layers,
+                                                       dim_feedforward, dropout, vocab_size, tokenizer])
         self.posn = PositionalEncoding(d_model=d_model)
         self.start_symbol, self.end_symbol, self.pad_token = 1, 2, 3
         self.embedding = nn.Embedding(vocab_size + 2, d_model)
@@ -41,7 +41,7 @@ class TransformerModel(nn.Module):
         :param max_len: max length of the generator
         :return: predicted text
         """
-        src_input = torch.LongTensor(self.tokenize_string(src))
+        src_input = torch.LongTensor([self.start_symbol] + self.tokenize_string(src) + [self.end_symbol])
 
         src_tensor = self.embedding(torch.LongTensor(src_input)).unsqueeze(1)
 
@@ -65,7 +65,7 @@ class TransformerModel(nn.Module):
         with open(text_file, encoding="utf-8") as infile:
             lines = [x.rstrip("\n") for x in infile.readlines()]
         for i in range(0, len(lines), self.batch_size):
-            tokenized = [self.tokenize_string(x) for x in lines[i:i+self.batch_size]]
+            tokenized = [[self.start_symbol] + self.tokenize_string(x) + [self.end_symbol] for x in lines[i:i + self.batch_size]]
             tensorized = [torch.LongTensor(x) for x in tokenized]
             tensor = torch.nn.utils.rnn.pad_sequence(tensorized, batch_first=True, padding_value=3)
             masks = [[False for _ in range(len(sentence))] + [True for _ in range(tensor.shape[1] - len(sentence))]
@@ -84,4 +84,6 @@ if __name__ == "__main__":
     model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
     model.load_state_dict(torch.load("iter6800.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Ekmek aldım, eve gittim.", max_len=128)
+    # TODO start and end symbols ensure
+    # TODO decoder square mask generate
     print(decoded)
