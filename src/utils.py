@@ -3,6 +3,9 @@ import sentencepiece as spm
 tokenizer_data_files = {"tr": "data/spm/tr.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model"}
 
+data_paths = {"antoloji": {"src": "data/tr/antoloji.train.prose", "tgt": "data/tr/antoloji.train.poetry",
+                           "dev_src": "data/tr/antoloji.dev.prose", "dev_tgt": "data/tr/antoloji.dev.poetry"}}
+
 
 def get_tokenizer(tokenizer_name: str, vocab_size=32000):
     assert tokenizer_name in tokenizer_model_paths

@@ -6,15 +6,18 @@ from utils import get_tokenizer
 
 class TransformerModel(nn.Module):
     def __init__(self, d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6, num_decoder_layers: int = 6,
-                 dim_feedforward: int = 2048, dropout: float = 0.1, vocab_size=32000, tokenizer="tr"):
+                 dim_feedforward: int = 2048, dropout: float = 0.1, vocab_size=32000, tokenizer="tr", batch_size=32):
         super(TransformerModel, self).__init__()
         self.transformer = nn.Transformer(d_model=d_model, nhead=nhead, num_encoder_layers=num_encoder_layers,
                                           num_decoder_layers=num_decoder_layers, dim_feedforward=dim_feedforward,
                                           dropout=dropout)
+        self.config_string = "-".join(str(x) for x in[d_model, nhead, num_encoder_layers, num_decoder_layers,
+                                                      dim_feedforward, dropout, vocab_size, tokenizer])
         self.posn = PositionalEncoding(d_model=d_model)
         self.start_symbol, self.end_symbol, self.pad_token = 1, 2, 3
         self.embedding = nn.Embedding(vocab_size + 2, d_model)
         self.vocab_out = nn.Linear(d_model, vocab_size)
+        self.batch_size = batch_size
         self.tokenizer = get_tokenizer(tokenizer)
 
     def forward(self, src, tgt, src_key_mask=None, tgt_key_mask=None):
@@ -22,7 +25,7 @@ class TransformerModel(nn.Module):
         transformer_out = self.transformer(src_embedded, tgt_embedded, src_key_padding_mask=src_key_mask,
                                            tgt_key_padding_mask=tgt_key_mask)
         tokens_out = self.vocab_out(transformer_out)
-        return tokens_out.view(-1, tokens_out.size(-1))
+        return tokens_out
 
     def tokenize_string(self, src, out_type=int):
         return self.tokenizer.encode(src, out_type=out_type)
@@ -58,16 +61,22 @@ class TransformerModel(nn.Module):
 
         return self.decode_string(tgt_input)
 
-    def batch_generator(self, text_file, batch_size=32):
+    def batch_generator(self, text_file):
         with open(text_file, encoding="utf-8") as infile:
             lines = [x.rstrip("\n") for x in infile.readlines()]
-        for i in range(0, len(lines), batch_size):
-            tokenized = [self.tokenize_string(x) for x in lines[i:i+batch_size]]
+        for i in range(0, len(lines), self.batch_size):
+            tokenized = [self.tokenize_string(x) for x in lines[i:i+self.batch_size]]
             tensorized = [torch.LongTensor(x) for x in tokenized]
             tensor = torch.nn.utils.rnn.pad_sequence(tensorized, batch_first=True, padding_value=3)
             masks = [[False for _ in range(len(sentence))] + [True for _ in range(tensor.shape[1] - len(sentence))]
                      for sentence in tokenized]
             yield torch.reshape(tensor, (tensor.shape[1], tensor.shape[0])), torch.BoolTensor(masks)
+
+    def save(self, path):
+        torch.save(self.state_dict(), path)
+
+    def load(self, path):
+        self.load_state_dict(torch.load(path))
 
 
 if __name__ == "__main__":
@@ -79,3 +88,4 @@ if __name__ == "__main__":
     print(f)
     decoded = model.predict_inference_src("Merhaba gurbet.", max_len=128)
     print(decoded)
+    print(model.config_string)
