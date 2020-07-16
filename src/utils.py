@@ -1,4 +1,5 @@
 import sentencepiece as spm
+import sacrebleu
 
 tokenizer_data_files = {"tr": "data/spm/tr.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model"}
@@ -20,6 +21,9 @@ def get_tokenizer(tokenizer_name: str, vocab_size=32000):
         sp_model.Load(tokenizer_model_paths[tokenizer_name])
     return sp_model
 
+
+def score_translation(system_output, reference):
+    return sacrebleu.corpus_bleu(system_output, reference)
 
 
 

@@ -24,7 +24,7 @@ class TransformerModel(nn.Module):
     def forward(self, src, tgt, src_key_mask=None, tgt_key_mask=None):
         src_embedded, tgt_embedded = self.embedding(src), self.embedding(tgt)
         transformer_out = self.transformer(src_embedded, tgt_embedded, src_key_padding_mask=src_key_mask,
-                                           tgt_key_padding_mask=tgt_key_mask)
+                                           tgt_key_padding_mask=tgt_key_mask, tgt_mask=self.transformer.generate_square_subsequent_mask(tgt.shape[0]))
         tokens_out = self.vocab_out(transformer_out)
         return tokens_out
 
@@ -34,7 +34,7 @@ class TransformerModel(nn.Module):
     def decode_string(self, src_indices):
         return self.tokenizer.decode(src_indices)
 
-    def predict_inference_src(self, src: str, max_len: int = 512) -> str:
+    def predict_inference_src(self, src: str, max_len: int = 256) -> str:
         """
         Used on inference to predict
         :param src: String text as source
@@ -79,11 +79,19 @@ class TransformerModel(nn.Module):
     def load(self, path):
         self.load_state_dict(torch.load(path))
 
+    def translate_dev(self, input_path, save_path):
+        with open(input_path, encoding="utf-8") as infile:
+            dev_sentences = [x.rstrip("\n") for x in infile.readlines()]
+        translated = []
+        for sentence in dev_sentences:
+            translated.append(self.predict_inference_src(sentence))
+        with open(save_path, "w", encoding="utf-8") as outfile:
+            for line in translated:
+                outfile.write(line + "\n")
+
 
 if __name__ == "__main__":
     model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
     model.load_state_dict(torch.load("iter6800.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Ekmek aldım, eve gittim.", max_len=128)
-    # TODO start and end symbols ensure
-    # TODO decoder square mask generate
     print(decoded)
