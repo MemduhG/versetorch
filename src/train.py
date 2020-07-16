@@ -58,4 +58,4 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
 
 
 if __name__ == "__main__":
-    run_training(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
+    run_training(d_model=512, dim_feedforward=512, num_decoder_layers=6, num_encoder_layers=6)

@@ -82,6 +82,6 @@ class TransformerModel(nn.Module):
 
 if __name__ == "__main__":
     model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
-    model.load("iter700.pt")
+    model.load_state_dict(torch.load("iter6800.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Ekmek aldım, eve gittim.", max_len=128)
     print(decoded)
