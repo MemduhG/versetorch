@@ -23,8 +23,9 @@ class TransformerModel(nn.Module):
 
     def forward(self, src, tgt, src_key_mask=None, tgt_key_mask=None):
         src_embedded, tgt_embedded = self.embedding(src), self.embedding(tgt)
+        square_mask = self.transformer.generate_square_subsequent_mask(tgt.shape[0]).to(self.device)
         transformer_out = self.transformer(src_embedded, tgt_embedded, src_key_padding_mask=src_key_mask,
-                                           tgt_key_padding_mask=tgt_key_mask, tgt_mask=self.transformer.generate_square_subsequent_mask(tgt.shape[0]))
+                                           tgt_key_padding_mask=tgt_key_mask, tgt_mask=square_mask)
         tokens_out = self.vocab_out(transformer_out)
         return tokens_out
 
@@ -59,6 +60,7 @@ class TransformerModel(nn.Module):
             if out_token == self.end_symbol:
                 break
 
+        print(tgt_input)
         return self.decode_string(tgt_input)
 
     def batch_generator(self, text_file):
@@ -93,5 +95,5 @@ class TransformerModel(nn.Module):
 if __name__ == "__main__":
     model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
     model.load_state_dict(torch.load("iter6800.pt", map_location=torch.device('cpu')))
-    decoded = model.predict_inference_src("Ekmek aldım, eve gittim.", max_len=128)
+    decoded = model.predict_inference_src("Nazım Hikmet vatan hainliğine devam ediyor hala.", max_len=128)
     print(decoded)
