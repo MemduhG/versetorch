@@ -50,7 +50,7 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
             print(total_loss)
             iter += 1
             print(iter)
-            if iter % 100 == 0:
+            if iter % 5000 == 0:
                 print("Saving model after {} iterations". format(iter))
                 model.save(os.path.join(model_path, "iter{}.pt".format(iter)))
 

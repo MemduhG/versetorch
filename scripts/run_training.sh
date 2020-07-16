@@ -1,8 +1,8 @@
 #!/bin/bash -v
 #PBS -q gpu
 #PBS -N versetorch
-#PBS -l select=1:ncpus=1:ngpus=1:mem=10gb:scratch_local=10gb:cl_adan=True
-#PBS -l walltime=0:30:00 
+#PBS -l select=1:ncpus=4:ngpus=2:mem=10gb:scratch_local=10gb:cl_adan=True
+#PBS -l walltime=0:10:00 
 #PBS -j oe
 
 module add python-3.6.2-gcc
