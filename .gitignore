@@ -1,2 +1,6 @@
 .idea
 src/__pycache__
+venv
+training
+src/.data
+src/s2s.py

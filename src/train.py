@@ -2,14 +2,17 @@ from submodels import TransformerModel, PositionalEncoding
 import os
 from utils import data_paths
 from torch import nn, optim
+import torch
 
 
 def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6, num_decoder_layers: int = 6,
                 dim_feedforward: int = 2048, dropout: float = 0.1, vocab_size=32000, tokenizer="tr",
                 dataset="antoloji", style=0., rhyme=0., rl=False, batch_size=32, epochs=10):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = TransformerModel(d_model=d_model, nhead=nhead, num_encoder_layers=num_encoder_layers,
-                                  num_decoder_layers=num_decoder_layers, dim_feedforward=dim_feedforward,
-                                  dropout=dropout, vocab_size=vocab_size, tokenizer=tokenizer, batch_size=batch_size)
+                             num_decoder_layers=num_decoder_layers, dim_feedforward=dim_feedforward,
+                             dropout=dropout, vocab_size=vocab_size, tokenizer=tokenizer,
+                             batch_size=batch_size).to(device)
     model_path = os.path.join("training", dataset, model.config_string, "transformer")
     iter = 0
     if os.path.exists(model_path):

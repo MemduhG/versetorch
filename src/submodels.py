@@ -19,6 +19,7 @@ class TransformerModel(nn.Module):
         self.vocab_out = nn.Linear(d_model, vocab_size)
         self.batch_size = batch_size
         self.tokenizer = get_tokenizer(tokenizer)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def forward(self, src, tgt, src_key_mask=None, tgt_key_mask=None):
         src_embedded, tgt_embedded = self.embedding(src), self.embedding(tgt)
@@ -44,7 +45,6 @@ class TransformerModel(nn.Module):
 
         src_tensor = self.embedding(torch.LongTensor(src_input)).unsqueeze(1)
 
-        print(src_tensor)
         memory = self.transformer.encoder(src_tensor)
 
         tgt_input = [self.start_symbol]
@@ -70,7 +70,8 @@ class TransformerModel(nn.Module):
             tensor = torch.nn.utils.rnn.pad_sequence(tensorized, batch_first=True, padding_value=3)
             masks = [[False for _ in range(len(sentence))] + [True for _ in range(tensor.shape[1] - len(sentence))]
                      for sentence in tokenized]
-            yield torch.reshape(tensor, (tensor.shape[1], tensor.shape[0])), torch.BoolTensor(masks)
+            yield torch.reshape(tensor, (tensor.shape[1], tensor.shape[0])).to(self.device), \
+                torch.BoolTensor(masks).to(self.device)
 
     def save(self, path):
         torch.save(self.state_dict(), path)
@@ -81,11 +82,6 @@ class TransformerModel(nn.Module):
 
 if __name__ == "__main__":
     model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
-    generator = model.batch_generator(text_file="data/tr/antoloji.train.poetry")
-    tensor, masks = next(generator)
-    print(masks.shape, tensor.shape)
-    f = model.forward(tensor, tensor, src_key_mask=masks)
-    print(f)
-    decoded = model.predict_inference_src("Merhaba gurbet.", max_len=128)
+    model.load("iter700.pt")
+    decoded = model.predict_inference_src("Ekmek aldım, eve gittim.", max_len=128)
     print(decoded)
-    print(model.config_string)
