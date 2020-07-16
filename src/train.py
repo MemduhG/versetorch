@@ -16,6 +16,9 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
         models = sorted(os.listdir(model_path), key=lambda x: os.stat(os.path.join(model_path, x)).st_mtime)
         if len(models) > 0:
             model.load(os.path.join(model_path, models[-1]))
+            iter = int(models[-1].partition(".pt")[0].partition("iter")[2])
+        else:
+            model.save(os.path.join(model_path, "iter{}.pt".format(iter)))
     else:
         os.makedirs(model_path)
         model.save(os.path.join(model_path, "iter{}.pt".format(iter)))
@@ -27,6 +30,7 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
     optimizer = optim.SGD(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
     for epoch in range(epochs):
+        print("Beginning epoch {}.".format(epoch + 1))
         total_loss = 0.
         src, tgt = model.batch_generator(data_paths[dataset]["src"]), model.batch_generator(data_paths[dataset]["tgt"])
         for src_batch, tgt_batch in zip(src, tgt):
@@ -40,14 +44,14 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
             optimizer.step()
 
             total_loss += loss.item()
+            print(total_loss)
             iter += 1
-            print(src_batch)
-            print(tgt_batch)
-
-            input()
+            print(iter)
+            if iter % 100 == 0:
+                print("Saving model after {} iterations". format(iter))
+                model.save(os.path.join(model_path, "iter{}.pt".format(iter)))
 
         scheduler.step()
-
 
 
 if __name__ == "__main__":
