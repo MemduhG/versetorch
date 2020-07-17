@@ -40,13 +40,12 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
             optimizer.zero_grad()
             src_input, src_mask = src_batch
             tgt_input, tgt_mask = tgt_batch
-            tgt_startless, tgt_mask = tgt_input[1:, :], tgt_mask[:, 1:]
-            tgt_endless = tgt_input[:-1, :]
-            square_mask = model.generate_square_subsequent_mask(tgt_startless.shape[0]).to(device)
-            output = model.forward(src_input, src_key_mask=src_mask, tgt=tgt_startless, tgt_key_mask=tgt_mask,
-                                   tgt_mask=square_mask)
+            tgt_output = tgt_input[1:, :]
+            decoder_input = tgt_input[:-1, :]
+            tgt_mask = tgt_mask[:, :-1]
+            output = model.forward(src_input, src_key_mask=src_mask, tgt=decoder_input, tgt_key_mask=tgt_mask)
             output_flat = output.view(-1, vocab_size)
-            tgt_flat = tgt_endless.flatten()
+            tgt_flat = tgt_output.flatten()
             loss = criterion(output_flat, tgt_flat)
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 0.5)
