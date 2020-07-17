@@ -4,3 +4,4 @@ venv
 training
 src/.data
 src/s2s.py
+*.pt

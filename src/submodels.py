@@ -72,8 +72,9 @@ class TransformerModel(nn.Module):
             tensor = torch.nn.utils.rnn.pad_sequence(tensorized, batch_first=True, padding_value=3)
             masks = [[False for _ in range(len(sentence))] + [True for _ in range(tensor.shape[1] - len(sentence))]
                      for sentence in tokenized]
-            yield torch.reshape(tensor, (tensor.shape[1], tensor.shape[0])).to(self.device), \
-                torch.BoolTensor(masks).to(self.device)
+            tensor_reshaped = tensor.permute(1, 0).to(self.device)
+            masks_reshaped = torch.BoolTensor(masks).to(self.device)
+            yield tensor_reshaped, masks_reshaped
 
     def save(self, path):
         torch.save(self.state_dict(), path)
@@ -93,7 +94,8 @@ class TransformerModel(nn.Module):
 
 
 if __name__ == "__main__":
-    model = TransformerModel(d_model=128, dim_feedforward=128, num_decoder_layers=2, num_encoder_layers=2)
-    model.load_state_dict(torch.load("iter6800.pt", map_location=torch.device('cpu')))
+    model = TransformerModel(d_model=512, dim_feedforward=512, num_decoder_layers=6, num_encoder_layers=6)
+    model.load_state_dict(torch.load("iter25000.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Nazım Hikmet vatan hainliğine devam ediyor hala.", max_len=128)
+    # TODO shift target by one, without start token for training.
     print(decoded)
