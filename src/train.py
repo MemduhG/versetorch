@@ -42,7 +42,7 @@ def run_training(d_model: int = 512, nhead: int = 8, num_encoder_layers: int = 6
             tgt_input, tgt_mask = tgt_batch
             tgt_startless, tgt_mask = tgt_input[1:, :], tgt_mask[:, 1:]
             tgt_endless = tgt_input[:-1, :]
-            square_mask = model.generate_square_subsequent_mask(tgt.shape[0]).to(device)
+            square_mask = model.generate_square_subsequent_mask(tgt_startless.shape[0]).to(device)
             output = model.forward(src_input, src_key_mask=src_mask, tgt=tgt_startless, tgt_key_mask=tgt_mask,
                                    tgt_mask=square_mask)
             output_flat = output.view(-1, vocab_size)
