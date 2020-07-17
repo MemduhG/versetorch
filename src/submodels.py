@@ -95,7 +95,7 @@ class TransformerModel(nn.Module):
 
 if __name__ == "__main__":
     model = TransformerModel(d_model=512, dim_feedforward=512, num_decoder_layers=6, num_encoder_layers=6)
-    model.load_state_dict(torch.load("iter25000.pt", map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load("iter45000.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Nazım Hikmet vatan hainliğine devam ediyor hala.", max_len=128)
     # TODO shift target by one, without start token for training.
     print(decoded)
