@@ -21,11 +21,14 @@ class TransformerModel(nn.Module):
         self.tokenizer = get_tokenizer(tokenizer)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    def forward(self, src, tgt, src_key_mask=None, tgt_key_mask=None):
+    def make_len_mask(self, inp):
+        return (inp == 3).transpose(0, 1)
+
+    def forward(self, src, tgt):
         src_embedded, tgt_embedded = self.embedding(src), self.embedding(tgt)
         square_mask = self.transformer.generate_square_subsequent_mask(tgt.shape[0]).to(self.device)
-        transformer_out = self.transformer(src_embedded, tgt_embedded, src_key_padding_mask=src_key_mask,
-                                           tgt_key_padding_mask=tgt_key_mask, tgt_mask=square_mask)
+        transformer_out = self.transformer(src_embedded, tgt_embedded, src_key_padding_mask=self.make_len_mask(src),
+                                           tgt_key_padding_mask=self.make_len_mask(tgt), tgt_mask=square_mask)
         tokens_out = self.vocab_out(transformer_out)
         return tokens_out
 
@@ -42,6 +45,7 @@ class TransformerModel(nn.Module):
         :param max_len: max length of the generator
         :return: predicted text
         """
+        self.eval()
         src_input = torch.LongTensor([self.start_symbol] + self.tokenize_string(src) + [self.end_symbol])
 
         src_tensor = self.embedding(torch.LongTensor(src_input)).unsqueeze(1)
@@ -95,7 +99,6 @@ class TransformerModel(nn.Module):
 
 if __name__ == "__main__":
     model = TransformerModel(d_model=512, dim_feedforward=512, num_decoder_layers=6, num_encoder_layers=6)
-    model.load_state_dict(torch.load("iter45000.pt", map_location=torch.device('cpu')))
     decoded = model.predict_inference_src("Nazım Hikmet vatan hainliğine devam ediyor hala.", max_len=128)
     # TODO shift target by one, without start token for training.
     print(decoded)

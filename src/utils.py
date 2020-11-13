@@ -26,4 +26,8 @@ def score_translation(system_output, reference):
     return sacrebleu.corpus_bleu(system_output, reference)
 
 
-
+if __name__ == "__main__":
+    st = "Yar misalini ne zemin u zaman gormustur"
+    tok = get_tokenizer("tr")
+    a = tok.EncodeAsIds(st)
+    print(a)

@@ -7,7 +7,9 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 import seaborn
 seaborn.set_context(context="talk")
+from data import get_dataset
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class EncoderDecoder(nn.Module):
     """
@@ -262,7 +264,7 @@ def make_model(src_vocab, tgt_vocab, N=6,
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform(p)
-    return model
+    return model.to(device)
 
 
 class Batch:
@@ -307,6 +309,7 @@ def run_epoch(data_iter, model, loss_compute):
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
+
 
 global max_src_in_batch, max_tgt_in_batch
 def batch_size_fn(new, count, sofar):
@@ -439,21 +442,27 @@ if True:
     def tokenize_en(text):
         return [tok.text for tok in spacy_en.tokenizer(text)]
 
-    BOS_WORD = '<s>'
-    EOS_WORD = '</s>'
-    BLANK_WORD = "<blank>"
-    SRC = data.Field(tokenize=tokenize_de, pad_token=BLANK_WORD)
-    TGT = data.Field(tokenize=tokenize_en, init_token = BOS_WORD,
-                     eos_token = EOS_WORD, pad_token=BLANK_WORD)
+    # BOS_WORD = '<s>'
+    # EOS_WORD = '</s>'
+    # BLANK_WORD = "<blank>"
+    # SRC = data.Field(tokenize=tokenize_de, pad_token=BLANK_WORD)
+    # TGT = data.Field(tokenize=tokenize_en, init_token = BOS_WORD,
+    #                  eos_token = EOS_WORD, pad_token=BLANK_WORD)
+    #
+    # MAX_LEN = 100
+    # train, val, test = datasets.IWSLT.splits(
+    #     exts=('.de', '.en'), fields=(SRC, TGT),
+    #     filter_pred=lambda x: len(vars(x)['src']) <= MAX_LEN and
+    #         len(vars(x)['trg']) <= MAX_LEN)
+    # MIN_FREQ = 2
+    # SRC.build_vocab(train.src, min_freq=MIN_FREQ)
+    # TGT.build_vocab(train.trg, min_freq=MIN_FREQ)
 
-    MAX_LEN = 100
-    train, val, test = datasets.IWSLT.splits(
-        exts=('.de', '.en'), fields=(SRC, TGT),
-        filter_pred=lambda x: len(vars(x)['src']) <= MAX_LEN and
-            len(vars(x)['trg']) <= MAX_LEN)
-    MIN_FREQ = 2
-    SRC.build_vocab(train.src, min_freq=MIN_FREQ)
-    TGT.build_vocab(train.trg, min_freq=MIN_FREQ)
+SRC, TGT, train, val, test = get_dataset("tr")
+
+MIN_FREQ = 2
+# SRC.build_vocab(train.src, min_freq=MIN_FREQ)
+# TGT.build_vocab(train.trg, min_freq=MIN_FREQ)
 
 
 class MyIterator(data.Iterator):
@@ -560,19 +569,19 @@ class MultiGPULossCompute:
 #                             batch_size_fn=batch_size_fn, train=False)
 #     model_par = nn.DataParallel(model, device_ids=devices)
 
-BATCH_SIZE = 12000
+BATCH_SIZE = 3000
 
-train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=0,
+train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=True)
-valid_iter = MyIterator(val, batch_size=BATCH_SIZE, device=0,
+valid_iter = MyIterator(val, batch_size=BATCH_SIZE, device=device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=False)
-pad_idx = TGT.vocab.stoi["<blank>"]
-model = make_model(len(SRC.vocab), len(TGT.vocab), N=6)
-criterion = LabelSmoothing(size=len(TGT.vocab), padding_idx=pad_idx, smoothing=0.1)
-BATCH_SIZE = 12000
-
+# pad_idx = TGT.vocab.stoi["<pad>"]
+pad_idx = 3
+model = make_model(32000, 32000, N=4)
+criterion = LabelSmoothing(size=32000, padding_idx=pad_idx, smoothing=0.1)
+#BATCH_SIZE = 12000
 
 model_opt = NoamOpt(model.src_embed[0].d_model, 1, 2000,
         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
