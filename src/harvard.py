@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -297,6 +299,7 @@ def run_epoch(data_iter, model, loss_compute):
     total_loss = 0
     tokens = 0
     for i, batch in enumerate(data_iter):
+        model.train()
         out = model.forward(batch.src, batch.trg,
                             batch.src_mask, batch.trg_mask)
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
@@ -307,7 +310,7 @@ def run_epoch(data_iter, model, loss_compute):
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
                     (i, loss / batch.ntokens, tokens / elapsed))
-            translate_sentence(model, sent="Hak yoluna giden Bektaşileriz.")
+            translate_sentence(model, sent="Hak yoluna gidenleriz.")
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
@@ -553,7 +556,7 @@ def translate_sentence(model, sent):
         if sym == 2: break
         to_decode.append(int(sym))
     trans = tokenizer.DecodeIdsWithCheck(to_decode)
-    print(trans)
+    print(trans.encode(encoding="utf-8",errors="strict"))
 
 
 BATCH_SIZE = 6000
@@ -576,7 +579,7 @@ for epoch in range(10):
     model.train()
     run_epoch((rebatch(pad_idx, b) for b in train_iter),
               model,
-              SimpleLossCompute(model.generator, criterion, None))
+              SimpleLossCompute(model.generator, criterion, model_opt))
     model.eval()
     loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model,
                       SimpleLossCompute(model.generator, criterion, None))
