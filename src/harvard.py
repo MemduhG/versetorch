@@ -541,9 +541,9 @@ def translate_sentence(model, sent):
     model.eval()
     tokenizer = get_tokenizer("tr")
     src_seq = tokenizer.EncodeAsIds(sent)
-    src = torch.LongTensor([src_seq])
+    src = torch.LongTensor([src_seq]).to(device)
     src = Variable(src)
-    src_mask = (src != 3).unsqueeze(-2)
+    src_mask = (src != 3).unsqueeze(-2).to(device)
     out = greedy_decode(model, src, src_mask,
                         max_len=60, start_symbol=1)
     print("Translation:", end="\t")
@@ -556,7 +556,7 @@ def translate_sentence(model, sent):
     print(trans)
 
 
-BATCH_SIZE = 12000
+BATCH_SIZE = 6000
 
 train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
