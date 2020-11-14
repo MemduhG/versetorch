@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import math, copy, time
 from torch.autograd import Variable
 import seaborn
+from utils import get_tokenizer
 seaborn.set_context(context="talk")
 from data import get_dataset
 
@@ -263,6 +264,7 @@ def make_model(src_vocab, tgt_vocab, N=6,
     for p in model.parameters():
         if p.dim() > 1:
             nn.init.xavier_uniform(p)
+
     return model.to(device)
 
 
@@ -305,6 +307,7 @@ def run_epoch(data_iter, model, loss_compute):
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
                     (i, loss / batch.ntokens, tokens / elapsed))
+            translate_sentence(model, sent="Hak yoluna giden Bektaşileriz.")
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
@@ -383,16 +386,6 @@ class LabelSmoothing(nn.Module):
         return self.criterion(x, Variable(true_dist, requires_grad=False))
 
 
-def data_gen(V, batch, nbatches):
-    "Generate random data for a src-tgt copy task."
-    for i in range(nbatches):
-        data = torch.from_numpy(np.random.randint(1, V, size=(batch, 10)))
-        data[:, 0] = 1
-        src = Variable(data, requires_grad=False)
-        tgt = Variable(data, requires_grad=False)
-        yield Batch(src, tgt, 0)
-
-
 class SimpleLossCompute:
     "A simple loss compute and train function."
 
@@ -431,27 +424,12 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
 from torchtext import data
 
 
-# BOS_WORD = '<s>'
-# EOS_WORD = '</s>'
-# BLANK_WORD = "<blank>"
-# SRC = data.Field(tokenize=tokenize_de, pad_token=BLANK_WORD)
-# TGT = data.Field(tokenize=tokenize_en, init_token = BOS_WORD,
-#                  eos_token = EOS_WORD, pad_token=BLANK_WORD)
-#
-# MAX_LEN = 100
-# train, val, test = datasets.IWSLT.splits(
-#     exts=('.de', '.en'), fields=(SRC, TGT),
-#     filter_pred=lambda x: len(vars(x)['src']) <= MAX_LEN and
-#         len(vars(x)['trg']) <= MAX_LEN)
-# MIN_FREQ = 2
-# SRC.build_vocab(train.src, min_freq=MIN_FREQ)
-# TGT.build_vocab(train.trg, min_freq=MIN_FREQ)
+
 
 SRC, TGT, train, val, test = get_dataset("tr")
 
 MIN_FREQ = 2
-# SRC.build_vocab(train.src, min_freq=MIN_FREQ)
-# TGT.build_vocab(train.trg, min_freq=MIN_FREQ)
+
 
 
 class MyIterator(data.Iterator):
@@ -558,7 +536,27 @@ class MultiGPULossCompute:
 #                             batch_size_fn=batch_size_fn, train=False)
 #     model_par = nn.DataParallel(model, device_ids=devices)
 
-BATCH_SIZE = 3000
+
+def translate_sentence(model, sent):
+    model.eval()
+    tokenizer = get_tokenizer("tr")
+    src_seq = tokenizer.EncodeAsIds(sent)
+    src = torch.LongTensor([src_seq])
+    src = Variable(src)
+    src_mask = (src != 3).unsqueeze(-2)
+    out = greedy_decode(model, src, src_mask,
+                        max_len=60, start_symbol=1)
+    print("Translation:", end="\t")
+    to_decode = []
+    for i in range(1, out.size(1)):
+        sym = out[0, i].item()
+        if sym == 2: break
+        to_decode.append(int(sym))
+    trans = tokenizer.DecodeIdsWithCheck(to_decode)
+    print(trans)
+
+
+BATCH_SIZE = 12000
 
 train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
@@ -568,7 +566,7 @@ valid_iter = MyIterator(val, batch_size=BATCH_SIZE, device=device,
                         batch_size_fn=batch_size_fn, train=False)
 # pad_idx = TGT.vocab.stoi["<pad>"]
 pad_idx = 3
-model = make_model(32000, 32000, N=4)
+model = make_model(32000, 32000, N=6)
 criterion = LabelSmoothing(size=32000, padding_idx=pad_idx, smoothing=0.1)
 #BATCH_SIZE = 12000
 
