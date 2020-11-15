@@ -426,12 +426,7 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
 
 from torchtext import data
 
-
-
-
 SRC, TGT, train, val, test = get_dataset("tr")
-
-MIN_FREQ = 2
 
 
 
@@ -522,24 +517,6 @@ class MultiGPULossCompute:
             self.opt.optimizer.zero_grad()
         return total * normalize
 
-# # GPUs to use
-# devices = [0, 1, 2, 3]
-# if True:
-#
-#     model = make_model(len(SRC.vocab), len(TGT.vocab), N=6)
-#     model.cuda()
-#     criterion = LabelSmoothing(size=len(TGT.vocab), padding_idx=pad_idx, smoothing=0.1)
-#     criterion.cuda()
-#     BATCH_SIZE = 12000
-#     train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=0,
-#                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-#                             batch_size_fn=batch_size_fn, train=True)
-#     valid_iter = MyIterator(val, batch_size=BATCH_SIZE, device=0,
-#                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-#                             batch_size_fn=batch_size_fn, train=False)
-#     model_par = nn.DataParallel(model, device_ids=devices)
-
-
 def translate_sentence(model, sent):
     model.eval()
     tokenizer = get_tokenizer("tr")
@@ -567,20 +544,28 @@ train_iter = MyIterator(train, batch_size=BATCH_SIZE, device=device,
 valid_iter = MyIterator(val, batch_size=BATCH_SIZE, device=device,
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=False)
-# pad_idx = TGT.vocab.stoi["<pad>"]
 pad_idx = 3
 model = make_model(32000, 32000, N=6)
 criterion = LabelSmoothing(size=32000, padding_idx=pad_idx, smoothing=0.1)
-#BATCH_SIZE = 12000
 
 model_opt = NoamOpt(model.src_embed[0].d_model, 1, 2000,
         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+
+device_count = torch.cuda.device_count()
+
+if device_count > 1:
+    print("Training with {} GPUs.".format(device_count))
+    devices = [x for x in range(device_count)]
+    loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt)
+    loss_val = MultiGPULossCompute(model.generator, criterion,  devices=devices, opt=None)
+else:
+    loss_train = SimpleLossCompute(model.generator, criterion, model_opt)
+    loss_val = SimpleLossCompute(model.generator, criterion, None)
+
+
 for epoch in range(10):
     model.train()
-    run_epoch((rebatch(pad_idx, b) for b in train_iter),
-              model,
-              SimpleLossCompute(model.generator, criterion, model_opt))
+    run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train)
     model.eval()
-    loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model,
-                      SimpleLossCompute(model.generator, criterion, None))
+    loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val)
     print(loss)
