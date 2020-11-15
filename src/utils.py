@@ -16,7 +16,7 @@ def get_tokenizer(tokenizer_name: str, vocab_size=32000):
     except OSError:
         spm_training_string = "--input={} --vocab_size={} --model_prefix={} \
                                --model_type={} --pad_id=3".format(tokenizer_data_files[tokenizer_name], vocab_size,
-                                                       "data/spm/" + tokenizer_name, "unigram")
+                                                                  "data/spm/" + tokenizer_name, "unigram")
         spm.SentencePieceTrainer.train(spm_training_string)
         sp_model.Load(tokenizer_model_paths[tokenizer_name])
     return sp_model
