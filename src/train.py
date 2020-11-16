@@ -7,11 +7,8 @@ from utils import get_tokenizer
 
 import time
 import argparse
-import seaborn
 import torch
 from torch import nn
-
-seaborn.set_context(context="talk")
 
 
 def run_epoch(data_iter, model, loss_compute, tokenizer):
@@ -48,7 +45,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer):
 
 def run_training(train_iter, valid_iter, tokenizer, epochs=10, vocab_size=32000, config_name=None):
     pad_idx = 3
-    model = make_model(vocab_size, vocab_size, N=6)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = make_model(vocab_size, vocab_size, N=6).to(device)
     criterion = LabelSmoothing(size=vocab_size, padding_idx=pad_idx, smoothing=0.1)
 
     model_opt = NoamOpt(model.src_embed[0].d_model, 1, 2000,
