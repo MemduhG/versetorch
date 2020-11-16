@@ -20,7 +20,14 @@ def run_epoch(data_iter, model, loss_compute, tokenizer):
     total_tokens = 0
     total_loss = 0
     tokens = 0
-    translate_sentence(model, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
+
+    def sanity_check():
+        if model.module is not None:
+            mod = model.module
+        else:
+            mod = model
+        translate_sentence(mod, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
+    sanity_check()
     for i, batch in enumerate(data_iter):
         model.train()
         out = model.forward(batch.src, batch.trg,
@@ -33,7 +40,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer):
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
                   (i, loss / batch.ntokens, tokens / elapsed))
-            translate_sentence(model, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
+            sanity_check()
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
