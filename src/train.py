@@ -12,7 +12,7 @@ from torch import nn
 
 
 def run_epoch(data_iter, model, loss_compute, tokenizer):
-    "Standard Training and Logging Function"
+    """Standard Training and Logging Function"""
     start = time.time()
     total_tokens = 0
     total_loss = 0
