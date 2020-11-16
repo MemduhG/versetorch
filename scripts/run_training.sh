@@ -1,8 +1,8 @@
 #!/bin/bash -v
 #PBS -q gpu
 #PBS -N versetorch
-#PBS -l select=1:ncpus=2:ngpus=1:mem=10gb:scratch_local=10gb:cl_adan=True
-#PBS -l walltime=6:00:00 
+#PBS -l select=1:ncpus=2:ngpus=2:mem=10gb:scratch_local=10gb:cl_adan=True
+#PBS -l walltime=0:10:00 
 #PBS -j oe
 
 module add python-3.6.2-gcc
@@ -15,4 +15,4 @@ cd $PBS_O_WORKDIR
 source scripts/venv.sh
 export PYTHONPATH=/storage/praha1/home/memduh/versetorch/venv/
 export PYTHON=/storage/praha1/home/memduh/versetorch/venv/bin/python
-$PYTHON src/harvard.py
+$PYTHON src/train.py

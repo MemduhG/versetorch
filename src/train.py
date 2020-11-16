@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from batch import rebatch
-from data import get_dataset
+from data import get_dataset, get_training_iterators
 from loss_optim import MultiGPULossCompute, SimpleLossCompute
 from model import make_model, NoamOpt, LabelSmoothing, translate_sentence
 from utils import get_tokenizer
@@ -9,6 +9,7 @@ import time
 import argparse
 import seaborn
 import torch
+from torch import nn
 
 seaborn.set_context(context="talk")
 
@@ -51,18 +52,25 @@ def run_training(train_iter, valid_iter, tokenizer, epochs=10, vocab_size=32000,
         devices = [x for x in range(device_count)]
         loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt)
         loss_val = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=None)
+        model_par = nn.DataParallel(model, device_ids=devices)
+        for epoch in range(epochs):
+            model_par.train()
+            run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer)
+            model_par.eval()
+            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer)
+            print(loss)
     else:
         loss_train = SimpleLossCompute(model.generator, criterion, model_opt)
         loss_val = SimpleLossCompute(model.generator, criterion, None)
-    for epoch in range(epochs):
-        model.train()
-        run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, tokenizer)
-        model.eval()
-        loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer)
-        print(loss)
+        for epoch in range(epochs):
+            model.train()
+            run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, tokenizer)
+            model.eval()
+            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer)
+            print(loss)
 
 
 if __name__ == "__main__":
-    train, val, test = get_dataset("antoloji")
+    train, val, test = get_training_iterators("antoloji")
     tokenizer = get_tokenizer("tr")
     run_training(train, val, tokenizer)
