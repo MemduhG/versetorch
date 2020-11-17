@@ -19,6 +19,7 @@ class EncoderDecoder(nn.Module):
         self.src_embed = src_embed
         self.tgt_embed = tgt_embed
         self.generator = generator
+        self.steps = 0
 
     def forward(self, src, tgt, src_mask, tgt_mask):
         """Take in and process masked src and target sequences."""
