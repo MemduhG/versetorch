@@ -25,7 +25,7 @@ def get_dataset(dataset):
     return mt_train, mt_dev, mt_test
 
 
-def get_training_iterators(dataset, batch_size=6000):
+def get_training_iterators(dataset, batch_size=12000):
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device=0,

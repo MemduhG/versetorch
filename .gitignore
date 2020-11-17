@@ -5,3 +5,4 @@ training
 src/.data
 src/s2s.py
 *.pt
+*.[eo][0-9]*
