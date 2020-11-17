@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#!/storage/praha1/home/memduh/versetorch/venv python
+
 from batch import rebatch
 from data import get_dataset, get_training_iterators
 from loss_optim import MultiGPULossCompute, SimpleLossCompute
@@ -19,7 +20,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer):
     tokens = 0
 
     def sanity_check():
-        if model.module is not None:
+        if torch.cuda.device_count() > 1:
             mod = model.module
         else:
             mod = model

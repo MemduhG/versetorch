@@ -264,10 +264,11 @@ def make_model(src_vocab, tgt_vocab, N=6, d_model=512, d_ff=2048, h=8, dropout=0
 
 def translate_sentence(model, sent, tokenizer):
     model.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     src_seq = tokenizer.EncodeAsIds(sent)
-    src = torch.LongTensor([src_seq])
-    src = Variable(src)
-    src_mask = (src != 3).unsqueeze(-2)
+    src = torch.LongTensor([src_seq]).to(device)
+    src = Variable(src).to(device)
+    src_mask = (src != 3).unsqueeze(-2).to(device)
     out = greedy_decode(model, src, src_mask, max_len=256, start_symbol=1)
     print("Translation:", end="\t")
     to_decode = []

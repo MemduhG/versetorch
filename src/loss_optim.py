@@ -1,5 +1,6 @@
 from torch.autograd import Variable
 from torch import nn
+import torch
 
 
 # Skip if not interested in multigpu.
@@ -43,8 +44,8 @@ class MultiGPULossCompute:
             # Sum and normalize loss
             l = nn.parallel.gather(loss,
                                    target_device=self.devices[0])
-            l = l.sum()[0] / normalize
-            total += l.data[0]
+            l = l.sum() / normalize
+            total += l.data
 
             # Backprop loss to output of transformer
             if self.opt is not None:
