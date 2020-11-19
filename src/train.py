@@ -23,12 +23,11 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None):
     total_tokens = 0
     total_loss = 0
     tokens = 0
-
+    if torch.cuda.device_count() > 1:
+        mod = model.module
+    else:
+        mod = model
     def sanity_check():
-        if torch.cuda.device_count() > 1:
-            mod = model.module
-        else:
-            mod = model
         translate_sentence(mod, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
     # sanity_check()
     for i, batch in enumerate(data_iter):
@@ -40,15 +39,15 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None):
         total_tokens += batch.ntokens
         tokens += batch.ntokens
         if loss_compute is not None:
-            model.steps += 1
+            mod.steps += 1
             if save_path is not None:
-                if (time.time() - last_saved > 1800 and last_saved != t) or (not os.path.exists(save_path)) \
+                if (time.time() - last_saved > 1800) or (not os.path.exists(save_path)) \
                         or len(os.listdir(save_path)) == 0:
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)
-                    save_file = save_path + "/" + str(model.steps) + ".pt"
+                    save_file = save_path + "/" + str(mod.steps) + ".pt"
                     torch.save({
-                        'model_state_dict': model.state_dict(),
+                        'model_state_dict': mod.state_dict(),
                         'optimizer_state_dict': loss_compute.opt.optimizer.state_dict()},
                         save_file)
                     last_saved = time.time()
@@ -62,7 +61,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None):
     return total_loss / total_tokens
 
 
-def run_training(dataset, tokenizer, epochs=10, vocab_size=32000, config_name=None):
+def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_name=None):
     train_iter, valid_iter, _ = get_training_iterators(dataset)
     if config_name is None:
         config_name = "baseline"
@@ -76,7 +75,7 @@ def run_training(dataset, tokenizer, epochs=10, vocab_size=32000, config_name=No
                         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
 
     if os.path.exists(save_path) and len(os.listdir(save_path)) > 0:
-        last = sorted(os.listdir("tmp"), reverse=True, key=lambda x: int(x.partition("-")[2].partition(".")[0]))[0]
+        last = sorted(os.listdir(save_path), reverse=True, key=lambda x: int(x.partition(".")[0]))[0]
         last_file = os.path.join(save_path, last)
         checkpoint = torch.load(last_file)
         model.load_state_dict(checkpoint['model_state_dict'])
