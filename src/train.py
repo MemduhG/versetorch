@@ -16,7 +16,7 @@ t = time.time()
 last_saved = t
 
 
-def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None):
+def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False):
     """Standard Training and Logging Function"""
     global t, last_saved
     start = time.time()
@@ -31,7 +31,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None):
         translate_sentence(mod, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
     # sanity_check()
     for i, batch in enumerate(data_iter):
-        model.train()
+        if validate is False:
+            model.train()
         out = model.forward(batch.src, batch.trg,
                             batch.src_mask, batch.trg_mask)
         loss = loss_compute(out, batch.trg_y, batch.ntokens)

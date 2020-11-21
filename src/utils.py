@@ -4,6 +4,8 @@ import sacrebleu
 tokenizer_data_files = {"tr": "data/spm/tr.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model"}
 
+dataset_to_tok = {"antoloji": "tr"}
+
 data_paths = {"antoloji": {"src": "data/tr/antoloji.train.prose", "tgt": "data/tr/antoloji.train.poetry",
                            "dev_src": "data/tr/antoloji.dev.prose", "dev_tgt": "data/tr/antoloji.dev.poetry"}}
 
