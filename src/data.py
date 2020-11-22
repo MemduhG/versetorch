@@ -3,6 +3,8 @@ from batch import MyIterator
 from torchtext import data, datasets
 from utils import get_tokenizer
 
+import torch
+
 
 def get_dataset(dataset):
     languages = {"antoloji": "tr"}
@@ -25,7 +27,11 @@ def get_dataset(dataset):
     return mt_train, mt_dev, mt_test
 
 
-def get_training_iterators(dataset, batch_size=12000):
+def get_training_iterators(dataset):
+    if torch.cuda.device_count() > 1:
+        batch_size = 12000
+    else:
+        batch_size = 1000
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device=0,

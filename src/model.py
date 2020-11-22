@@ -6,6 +6,9 @@ import copy, math
 import numpy as np
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 class EncoderDecoder(nn.Module):
     """
     A standard Encoder-Decoder architecture. Base for this and many
@@ -186,7 +189,7 @@ class MultiHeadedAttention(nn.Module):
              for l, x in zip(self.linears, (query, key, value))]
 
         # 2) Apply attention on all the projected vectors in batch.
-        x, self.attn = attention(query, key, value, mask=mask,
+        x, self.attn = attention(query, key, value, mask=mask.to(device),
                                  dropout=self.dropout)
 
         # 3) "Concat" using a view and apply a final linear.
@@ -358,15 +361,16 @@ class LabelSmoothing(nn.Module):
 
 
 def greedy_decode(model, src, src_mask, max_len, start_symbol):
-    memory = model.encode(src, src_mask)
-    ys = torch.ones(src.shape[0], 1).fill_(start_symbol).type_as(src.data)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    memory = model.encode(src.to(device), src_mask.to(device))
+    ys = torch.ones(src.shape[0], 1).fill_(start_symbol).type_as(src.data).to(device)
     for i in range(max_len-1):
         out = model.decode(memory, src_mask,
-                           Variable(ys),
-                           Variable(subsequent_mask(ys.size(1)).type_as(src.data)))
+                           Variable(ys).to(device),
+                           Variable(subsequent_mask(ys.size(1)).type_as(src.data)).to(device))
         prob = model.generator(out[:, -1])
         _, next_word = torch.max(prob, dim = 1)
         next_word = next_word.data[0]
         ys = torch.cat([ys,
-                        torch.ones(src.shape[0], 1).type_as(src.data).fill_(next_word)], dim=1)
+                        torch.ones(src.shape[0], 1).type_as(src.data).fill_(next_word).to(device)], dim=1)
     return ys
