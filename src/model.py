@@ -370,7 +370,7 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
                            Variable(subsequent_mask(ys.size(1)).type_as(src.data)).to(device))
         prob = model.generator(out[:, -1])
         _, next_word = torch.max(prob, dim = 1)
-        next_word = next_word.data[0]
-        ys = torch.cat([ys,
-                        torch.ones(src.shape[0], 1).type_as(src.data).fill_(next_word).to(device)], dim=1)
+        # next_word = next_word.data[0]
+        ys = torch.cat([ys, next_word.unsqueeze(1)], dim=1)
+                        # torch.ones(src.shape[0], 1).type_as(src.data).fill_(next_word).to(device)], dim=1)
     return ys
