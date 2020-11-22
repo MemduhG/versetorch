@@ -6,7 +6,7 @@ do
 	config=`echo $experiment | cut -f2 -d "-"`	
 	for checkpoint in `ls -v checkpoints/$experiment`
 	do
-		step=`echo $checkpoint | cut -f2 -d "."`
+		step=`echo $checkpoint | cut -f1 -d "."`
 		save_path="translations/$experiment/$step"
 		ckp_path=checkpoints/$experiment/$checkpoint
 		mkdir -p translations/$experiment
