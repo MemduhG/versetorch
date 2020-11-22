@@ -36,7 +36,7 @@ def translate_file(checkpoint_path, dataset, vocab_size=32000, config=None):
                     break
                 to_decode.append(int(sym))
             trans = tokenizer.DecodeIdsWithCheck(to_decode)
-            print("Decoded: {}".format(trans))
+            print("Decoded: {}".format(trans).encode('utf-8'))
             decoded.append(trans)
     if not os.path.exists("translations"):
         os.makedirs("translations")
