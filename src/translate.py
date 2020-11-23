@@ -4,7 +4,7 @@ import os
 import torch
 
 from batch import rebatch
-from data import get_training_iterators
+from data import get_training_iterators, get_dev_set
 from model import make_model, greedy_decode, translate_sentence
 from utils import dataset_to_tok, get_tokenizer
 
@@ -22,7 +22,7 @@ def translate_file(checkpoint_path, dataset, vocab_size=32000, config=None):
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     tokenizer = get_tokenizer(dataset_to_tok[dataset])
-    train, val, test = get_training_iterators(dataset)
+    val = get_dev_set(dataset)
     pad_idx = 3
     val = (rebatch(pad_idx, b) for b in val)
     decoded = []

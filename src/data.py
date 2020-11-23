@@ -1,5 +1,5 @@
 from model import batch_size_fn
-from batch import MyIterator
+from batch import MyIterator, UnsortedIterator
 from torchtext import data, datasets
 from utils import get_tokenizer
 
@@ -45,6 +45,18 @@ def get_training_iterators(dataset):
                            batch_size_fn=batch_size_fn, train=False)
 
     return train_iter, valid_iter, test_iter
+
+
+def get_dev_set(dataset):
+    if torch.cuda.device_count() > 1:
+        batch_size = 12000
+    else:
+        batch_size = 1000
+    train, val, test = get_dataset(dataset)
+
+    valid_iter = UnsortedIterator(val, batch_size=batch_size, device=0,
+                            repeat=False, batch_size_fn=batch_size_fn, train=False)
+    return valid_iter
 
 
 if __name__ == "__main__":

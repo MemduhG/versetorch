@@ -47,6 +47,16 @@ class MyIterator(data.Iterator):
                 self.batches.append(sorted(b, key=self.sort_key))
 
 
+class UnsortedIterator(data.Iterator):
+    def create_batches(self):
+        self.batches = []
+        for b in data.batch(self.data(), self.batch_size,
+                            self.batch_size_fn):
+            self.batches.append(b)
+
+
+
+
 def rebatch(pad_idx, batch):
     "Fix order in torchtext to match ours"
     src, trg = batch.src.transpose(0, 1), batch.trg.transpose(0, 1)
