@@ -11,7 +11,7 @@ from utils import dataset_to_tok, get_tokenizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def translate_file(checkpoint_path, dataset, vocab_size=32000, config=None):
+def translate_devset(checkpoint_path, dataset, vocab_size=32000, config=None):
     if config is None:
         experiment_name = dataset + "-baseline"
     else:
@@ -22,7 +22,8 @@ def translate_file(checkpoint_path, dataset, vocab_size=32000, config=None):
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     tokenizer = get_tokenizer(dataset_to_tok[dataset])
-    val = get_dev_set(dataset)
+    train, val, test = get_training_iterators(dataset)
+    line_numbers = val.indices
     pad_idx = 3
     val = (rebatch(pad_idx, b) for b in val)
     decoded = []
@@ -38,12 +39,15 @@ def translate_file(checkpoint_path, dataset, vocab_size=32000, config=None):
             trans = tokenizer.DecodeIdsWithCheck(to_decode)
             print("Decoded: {}".format(trans).encode('utf-8'))
             decoded.append(trans)
+    reordered = decoded[:]
+    for c, sentence in decoded:
+        reordered[line_numbers[c]] = sentence
     if not os.path.exists("translations"):
         os.makedirs("translations")
     if not os.path.exists("translations/{}".format(experiment_name)):
         os.makedirs("translations/{}".format(experiment_name))
     with open(save_to, "w", encoding="utf-8") as outfile:
-        for line in decoded:
+        for line in reordered:
             outfile.writelines(line + "\n")
 
 
@@ -53,4 +57,4 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--config", type=str, required=False)
     args = parser.parse_args()
-    translate_file(args.checkpoint, args.dataset, config=args.config)
+    translate_devset(args.checkpoint, args.dataset, config=args.config)

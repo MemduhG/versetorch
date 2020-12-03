@@ -1,5 +1,5 @@
 from model import batch_size_fn
-from batch import MyIterator, UnsortedIterator
+from batch import MyIterator
 from torchtext import data, datasets
 from utils import get_tokenizer
 
@@ -39,10 +39,10 @@ def get_training_iterators(dataset):
                             batch_size_fn=batch_size_fn, train=True)
     valid_iter = MyIterator(val, batch_size=batch_size, device=0,
                             repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-                            batch_size_fn=batch_size_fn, train=False)
+                            batch_size_fn=batch_size_fn, train=False, sort=True)
     test_iter = MyIterator(test, batch_size=batch_size, device=0,
                            repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
-                           batch_size_fn=batch_size_fn, train=False)
+                           batch_size_fn=batch_size_fn, train=False, sort=True)
 
     return train_iter, valid_iter, test_iter
 
@@ -60,4 +60,6 @@ def get_dev_set(dataset):
 
 
 if __name__ == "__main__":
-    pass
+    train, val, test = get_training_iterators("antoloji")
+    for batch in val:
+        print(batch)

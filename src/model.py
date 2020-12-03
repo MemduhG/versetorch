@@ -287,7 +287,6 @@ def translate_sentence(model, sent, tokenizer):
 
 global max_src_in_batch, max_tgt_in_batch
 
-
 def batch_size_fn(new, count, sofar):
     "Keep augmenting batch and calculate total number of tokens + padding."
     global max_src_in_batch, max_tgt_in_batch
@@ -299,6 +298,10 @@ def batch_size_fn(new, count, sofar):
     src_elements = count * max_src_in_batch
     tgt_elements = count * max_tgt_in_batch
     return max(src_elements, tgt_elements)
+
+
+def indexed_bsz_fn(sample, count, sofar):
+    return batch_size_fn(sample[1], count, sofar)
 
 
 class NoamOpt:
