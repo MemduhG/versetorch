@@ -23,11 +23,10 @@ def translate_devset(checkpoint_path, dataset, vocab_size=32000, config=None):
     model.eval()
     tokenizer = get_tokenizer(dataset_to_tok[dataset])
     train, val, test = get_training_iterators(dataset)
-    line_numbers = val.indices
     pad_idx = 3
-    val = (rebatch(pad_idx, b) for b in val)
+    val_iter = (rebatch(pad_idx, b) for b in val)
     decoded = []
-    for batch in val:
+    for batch in val_iter:
         out = greedy_decode(model, batch.src, batch.src_mask, max_len=256, start_symbol=1)
         for row in out:
             to_decode = []
@@ -40,6 +39,7 @@ def translate_devset(checkpoint_path, dataset, vocab_size=32000, config=None):
             print("Decoded: {}".format(trans).encode('utf-8'))
             decoded.append(trans)
     reordered = decoded[:]
+    line_numbers = val.indices
     for c, sentence in decoded:
         reordered[line_numbers[c]] = sentence
     if not os.path.exists("translations"):
