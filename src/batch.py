@@ -54,7 +54,7 @@ class MyIterator(data.Iterator):
             for b in data.batch(xs, self.batch_size, indexed_bsz_fn):
                 sorted_batch = sorted(b, key=lambda x: self.sort_key(x[1]))
                 self.batches.append([x[1] for x in sorted_batch])
-                self.indices.append([x[0] for x in sorted_batch])
+                self.indices.extend([x[0] for x in sorted_batch])
 
 
 def rebatch(pad_idx, batch):
