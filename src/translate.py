@@ -40,7 +40,7 @@ def translate_devset(checkpoint_path, dataset, vocab_size=32000, config=None):
             decoded.append(trans)
     reordered = decoded[:]
     line_numbers = val.indices
-    for c, sentence in decoded:
+    for c, sentence in enumerate(decoded):
         reordered[line_numbers[c]] = sentence
     if not os.path.exists("translations"):
         os.makedirs("translations")
