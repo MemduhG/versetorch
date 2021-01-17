@@ -3,10 +3,10 @@ import os
 
 import torch
 
-from batch import rebatch
-from data import get_training_iterators, get_dev_set
-from model import make_model, greedy_decode, translate_sentence
-from utils import dataset_to_tok, get_tokenizer
+from data_utils.batch import rebatch
+from data_utils.data import get_training_iterators
+from model.model import make_model, greedy_decode
+from utils.utils import dataset_to_tok, get_tokenizer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

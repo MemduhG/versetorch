@@ -1,14 +1,13 @@
 #!/storage/praha1/home/memduh/versetorch/venv python
 
-from batch import rebatch
-from data import get_dataset, get_training_iterators
-from loss_optim import MultiGPULossCompute, SimpleLossCompute
-from model import make_model, NoamOpt, LabelSmoothing, translate_sentence
-from utils import get_tokenizer
+from data_utils.batch import rebatch
+from data_utils.data import get_training_iterators
+from model.loss_optim import MultiGPULossCompute, SimpleLossCompute
+from model.model import make_model, NoamOpt, LabelSmoothing, translate_sentence
+from utils.utils import get_tokenizer
 
 import os
 import time
-import argparse
 import torch
 from torch import nn
 

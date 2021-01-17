@@ -2,11 +2,11 @@ from torchtext import data
 from torch.autograd import Variable
 
 
-from model import subsequent_mask, indexed_bsz_fn
+from src.model.model import subsequent_mask, indexed_bsz_fn
 
 
 class Batch:
-    """Object for holding a batch of data with mask during training."""
+    """Object for holding a batch of data_utils with mask during training."""
 
     def __init__(self, src, trg=None, pad=0):
         self.src = src
@@ -55,6 +55,7 @@ class MyIterator(data.Iterator):
                 sorted_batch = sorted(b, key=lambda x: self.sort_key(x[1]))
                 self.batches.append([x[1] for x in sorted_batch])
                 self.indices.extend([x[0] for x in sorted_batch])
+
 
 
 def rebatch(pad_idx, batch):
