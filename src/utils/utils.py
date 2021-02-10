@@ -4,10 +4,12 @@ import sacrebleu
 tokenizer_data_files = {"tr": "data/spm/tr.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model"}
 
-dataset_to_tok = {"antoloji": "tr"}
+dataset_to_tok = {"antoloji": "tr", "tur": "tr"}
 
 data_paths = {"antoloji": {"src": "data/tr/antoloji.train.prose", "tgt": "data/tr/antoloji.train.poetry",
-                           "dev_src": "data/tr/antoloji.dev.prose", "dev_tgt": "data/tr/antoloji.dev.poetry"}}
+                           "dev_src": "data/tr/antoloji.dev.prose", "dev_tgt": "data/tr/antoloji.dev.poetry"},
+              "tur": {"src": "data/tr/tur.train.src", "tgt": "data/tr/tur.train.tgt", "dev_src": "data/tr/tur.dev.src",
+                      "dev_tgt": "data/tr/tur.dev.tgt"}}
 
 
 def get_tokenizer(tokenizer_name: str, vocab_size=32000):
@@ -29,7 +31,4 @@ def score_translation(system_output, reference):
 
 
 if __name__ == "__main__":
-    st = "Yar misalini ne zemin u zaman gormustur"
-    tok = get_tokenizer("tr")
-    a = tok.EncodeAsIds(st)
-    print(a)
+    pass

@@ -111,4 +111,4 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
 
 if __name__ == "__main__":
     tokenizer = get_tokenizer("tr")
-    run_training("antoloji", tokenizer)
+    run_training("tur", tokenizer)

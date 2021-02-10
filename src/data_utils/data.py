@@ -17,9 +17,9 @@ def each_line(fname):
 def get_dataset_strings(dataset):
     languages = {"antoloji": "tr"}
     language = languages[dataset]
-    train = each_line('data/{}/{}.{}.prose'.format(language, dataset, "train"))
-    dev = each_line('data/{}/{}.{}.prose'.format(language, dataset, "dev"))
-    test = each_line('data/{}/{}.{}.prose'.format(language, dataset, "dev"))
+    train = each_line('data/{}/{}.{}.src'.format(language, dataset, "train"))
+    dev = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
+    test = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
 
     return train, dev, test
 
@@ -47,7 +47,7 @@ def produce_register(dataset):
 
 
 def get_dataset(dataset):
-    languages = {"antoloji": "tr"}
+    languages = {"antoloji": "tr", "tur":"tr", "turkish":"tr"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
 
@@ -56,13 +56,13 @@ def get_dataset(dataset):
     src = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
     tgt = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
     mt_train = datasets.TranslationDataset(
-        path='data/{}/{}.train'.format(language, dataset), exts=('.prose', '.poetry'),
+        path='data/{}/{}.train'.format(language, dataset), exts=('.src', '.tgt'),
         fields=(src, tgt))
     mt_dev = datasets.TranslationDataset(
-        path='data/{}/{}.dev'.format(language, dataset), exts=('.prose', '.poetry'),
+        path='data/{}/{}.dev'.format(language, dataset), exts=('.src', '.tgt'),
         fields=(src, tgt))
     mt_test = datasets.TranslationDataset(
-        path='data/{}/{}.test'.format(language, dataset), exts=('.prose', '.poetry'),
+        path='data/{}/{}.test'.format(language, dataset), exts=('.src', '.tgt'),
         fields=(src, tgt))
     return mt_train, mt_dev, mt_test
 
@@ -90,6 +90,8 @@ def get_training_iterators(dataset):
 
 
 if __name__ == "__main__":
-    train, val, test = get_training_iterators("antoloji")
+    train, val, test = get_training_iterators("tur")
     for batch in val:
         print(batch)
+        break
+
