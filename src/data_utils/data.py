@@ -15,7 +15,7 @@ def each_line(fname):
 
 
 def get_dataset_strings(dataset):
-    languages = {"antoloji": "tr"}
+    languages = {"antoloji": "tr", "tur": "tr"}
     language = languages[dataset]
     train = each_line('data/{}/{}.{}.src'.format(language, dataset, "train"))
     dev = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
