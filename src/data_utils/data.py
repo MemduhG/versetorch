@@ -30,7 +30,7 @@ def tokenize_string(string, tokenizer):
 
 def get_tokenized_dataset(dataset):
     train, dev, test = get_dataset_strings(dataset)
-    languages = {"antoloji": "tr"}
+    languages = {"antoloji": "tr", "tur": "tr"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
     train_set = [tokenize_string(x, tokenizer) for x in train]
