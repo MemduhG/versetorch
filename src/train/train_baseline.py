@@ -66,7 +66,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
 
 def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_name=None):
-    train_iter, valid_iter, _ = get_training_iterators(dataset)
+    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset)
     if config_name is None:
         config_name = "baseline"
     save_path = "checkpoints/" + dataset + "-" + config_name
