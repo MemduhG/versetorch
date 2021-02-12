@@ -38,7 +38,9 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             model.train()
         out = model.forward(batch.src, batch.trg,
                             batch.src_mask, batch.trg_mask)
+        del batch.src, batch.trg, batch.src_mask, batch.trg_mask
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
+        del out
         total_loss += loss
         total_tokens += batch.ntokens
         tokens += batch.ntokens
