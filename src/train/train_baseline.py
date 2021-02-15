@@ -36,12 +36,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
     for i, batch in enumerate(data_iter):
         if validate is False:
             model.train()
-        batch.src.to("cuda:0")
-        batch.trg.to("cuda:0")
-        batch.src_mask.to("cuda:0")
-        batch.trg_mask.to("cuda:0")
-        out = model.forward(batch.src, batch.trg,
-                            batch.src_mask, batch.trg_mask)
+        out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
+                            batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         total_tokens += batch.ntokens
@@ -104,7 +100,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
             print(loss)
     else:
         print("Training with 1 GPU.")
-        model.to("cuda:0")
+        model = model.to("cuda:0")
         loss_train = SimpleLossCompute(model.generator, criterion, model_opt)
         loss_val = SimpleLossCompute(model.generator, criterion, None)
         for epoch in range(epochs):
