@@ -101,6 +101,8 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
             loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer)
             print(loss)
     else:
+        print("Training with 1 GPU.")
+        model.to("cuda:0")
         loss_train = SimpleLossCompute(model.generator, criterion, model_opt)
         loss_val = SimpleLossCompute(model.generator, criterion, None)
         for epoch in range(epochs):
