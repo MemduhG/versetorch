@@ -36,9 +36,13 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
     for i, batch in enumerate(data_iter):
         if validate is False:
             model.train()
-        out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
-                            batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
-        loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
+        # out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
+        #                     batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
+        # loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
+        model.train()
+        out = model.forward(batch.src, batch.trg,
+                             batch.src_mask, batch.trg_mask)
+        loss = loss_compute(out, batch.trg_y, batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
         torch.cuda.empty_cache()
