@@ -40,6 +40,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
                             batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
         loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
         total_loss += float(loss)  # this might be the problem
+        del loss, out
+        torch.cuda.empty_cache()
         total_tokens += batch.ntokens
         tokens += batch.ntokens
         if loss_compute is not None:
