@@ -39,17 +39,19 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         # out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
         #                     batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
         # loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
-        print(0, torch.cuda.memory_allocated(0))
-        print(1, torch.cuda.memory_allocated(1))
+        print("Step", i, torch.cuda.memory_allocated(0))
 
         out = model.forward(batch.src, batch.trg,
                              batch.src_mask, batch.trg_mask)
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
+        print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
         torch.cuda.empty_cache()
         total_tokens += batch.ntokens
         tokens += batch.ntokens
+        del batch
+        print("Step", i, "after deleting batch", torch.cuda.memory_allocated(0))
         if loss_compute is not None:
             mod.steps += 1
             if save_path is not None:
