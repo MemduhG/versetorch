@@ -50,7 +50,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             if backup_loss is None:
                 continue
             else:
-                loss = backup_loss(out.to("cuda:0"), batch.trg_y.to("cuda:0"), batch.ntokens)
+                loss = backup_loss(out.to("cuda:1"), batch.trg_y.to("cuda:1"), batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
