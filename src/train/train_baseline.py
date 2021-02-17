@@ -109,14 +109,16 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         print("Training with {} GPUs.".format(device_count))
         devices = [x for x in range(device_count)]
         backup_loss = SimpleLossCompute(model.generator, criterion, model_opt)
-        loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt, backup_loss=backup_loss)
+        backup_val = SimpleLossCompute(model.generator, criterion, opt=None)
+        loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt)
         loss_val = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=None)
         model_par = nn.DataParallel(model, device_ids=devices)
         for epoch in range(epochs):
             model_par.train()
-            run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer, save_path=save_path)
+            run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer, save_path=save_path,
+                      backup_loss=backup_loss)
             model_par.eval()
-            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer)
+            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer, backup_loss=backup_val)
             print(loss)
     else:
         print("Training with 1 GPU.")
