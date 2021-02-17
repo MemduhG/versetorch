@@ -19,7 +19,7 @@ t = time.time()
 last_saved = t
 
 
-def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False):
+def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False, backup_loss=None):
     """Standard Training and Logging Function"""
     global t, last_saved
     start = time.time()
@@ -43,7 +43,14 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
         out = model.forward(batch.src, batch.trg,
                              batch.src_mask, batch.trg_mask)
-        loss = loss_compute(out, batch.trg_y, batch.ntokens)
+        try:
+            loss = loss_compute(out, batch.trg_y, batch.ntokens)
+        except AssertionError:
+            print("Batch was too small and pytorch didn't broadcast it properly.")
+            if backup_loss is None:
+                continue
+            else:
+                loss = backup_loss(out.to("cuda:0"), batch.trg_y.to("cuda:0"), batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
@@ -101,7 +108,8 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
     if device_count > 1:
         print("Training with {} GPUs.".format(device_count))
         devices = [x for x in range(device_count)]
-        loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt)
+        backup_loss = SimpleLossCompute(model.generator, criterion, model_opt)
+        loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt, backup_loss=backup_loss)
         loss_val = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=None)
         model_par = nn.DataParallel(model, device_ids=devices)
         for epoch in range(epochs):
