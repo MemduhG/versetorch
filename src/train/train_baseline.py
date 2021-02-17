@@ -48,8 +48,9 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
         torch.cuda.empty_cache()
-        total_tokens += batch.ntokens
-        tokens += batch.ntokens
+        ntokens = batch.ntokens
+        total_tokens += ntokens
+        tokens += ntokens
         del batch
         print("Step", i, "after deleting batch", torch.cuda.memory_allocated(0))
         if loss_compute is not None:
@@ -68,7 +69,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         if i % 50 == 1:
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
-                  (i, loss / batch.ntokens, tokens / elapsed))
+                  (i, loss / ntokens, tokens / elapsed))
             # sanity_check()
             start = time.time()
             tokens = 0
