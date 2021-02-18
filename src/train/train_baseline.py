@@ -43,12 +43,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         print("All", torch.cuda.memory_summary(device=None, abbreviated=False))
         print(0, torch.cuda.memory_summary(device=0, abbreviated=False))
         print(1, torch.cuda.memory_summary(device=1, abbreviated=False))
-        try:
-            out = model.forward(batch.src, batch.trg,
+        out = model.forward(batch.src, batch.trg,
                              batch.src_mask, batch.trg_mask)
-        except RuntimeError:
-            out = model.to("cuda:1").forward(batch.src.to("cuda:1"), batch.trg.to("cuda:1"), batch.src_mask.to("cuda:1"),
-                                             batch.trg_mask.to("cuda:1"))
         try:
             loss = loss_compute(out, batch.trg_y, batch.ntokens)
         except (AssertionError, RuntimeError):
