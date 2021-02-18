@@ -45,7 +45,11 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         else:
             out = model.forward(batch.src, batch.trg,
                                  batch.src_mask, batch.trg_mask)
-        loss = loss_compute(out, batch.trg_y, batch.ntokens)
+        if torch.cuda.device_count() == 1:
+            loss = loss_compute(out.to("cuda"), batch.trg_y.to("cuda"), batch.ntokens)
+        else:
+            loss = loss_compute(out, batch.trg_y, batch.ntokens)
+
         total_loss += float(loss)  # this might be the problem
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
