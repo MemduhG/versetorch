@@ -71,7 +71,7 @@ def get_training_iterators(dataset):
     if torch.cuda.device_count() > 1:
         batch_size = 3000
     else:
-        batch_size = 1000
+        batch_size = 512
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device=0,
