@@ -19,7 +19,7 @@ t = time.time()
 last_saved = t
 
 
-def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False, backup_loss=None):
+def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False, criterion=None, model_opt=None):
     """Standard Training and Logging Function"""
     global t, last_saved
     start = time.time()
@@ -47,14 +47,14 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             loss = loss_compute(out, batch.trg_y, batch.ntokens)
         except AssertionError:
             print("Batch was too small and pytorch didn't broadcast it properly.")
-            if backup_loss is None:
+            if torch.cuda.device_count() < 2:
                 continue
             else:
+                backup_loss = backup_loss = SimpleLossCompute(model.generator.to("cuda:1"), criterion, model_opt)
                 loss = backup_loss(out.to("cuda:1"), batch.trg_y.to("cuda:1"), batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))
-        torch.cuda.empty_cache()
         ntokens = batch.ntokens
         total_tokens += ntokens
         tokens += ntokens
@@ -81,6 +81,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             start = time.time()
             tokens = 0
         del loss
+        torch.cuda.empty_cache()
     return total_loss / total_tokens
 
 
@@ -108,17 +109,17 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
     if device_count > 1:
         print("Training with {} GPUs.".format(device_count))
         devices = [x for x in range(device_count)]
-        backup_loss = SimpleLossCompute(model.generator, criterion, model_opt)
+
         backup_val = SimpleLossCompute(model.generator, criterion, opt=None)
         loss_train = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=model_opt)
         loss_val = MultiGPULossCompute(model.generator, criterion, devices=devices, opt=None)
         model_par = nn.DataParallel(model, device_ids=devices)
         for epoch in range(epochs):
             model_par.train()
-            run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer, save_path=save_path,
-                      backup_loss=backup_loss)
+            run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer, save_path=save_path, criterion=criterion,
+                      modek_opt=model_opt)
             model_par.eval()
-            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer, backup_loss=backup_val)
+            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer)
             print(loss)
     else:
         print("Training with 1 GPU.")
