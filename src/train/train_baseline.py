@@ -52,7 +52,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             if torch.cuda.device_count() < 2:
                 continue
             else:
-                backup_loss = backup_loss = SimpleLossCompute(model.generator.to("cuda:1"), criterion, model_opt)
+                backup_loss = backup_loss = SimpleLossCompute(model.model.generator.to("cuda:1"), criterion, model_opt)
                 loss = backup_loss(out.to("cuda:1"), batch.trg_y.to("cuda:1"), batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
