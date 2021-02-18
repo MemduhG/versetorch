@@ -117,7 +117,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         for epoch in range(epochs):
             model_par.train()
             run_epoch((rebatch(pad_idx, b) for b in train_iter), model_par, loss_train, tokenizer, save_path=save_path, criterion=criterion,
-                      modek_opt=model_opt)
+                      model_opt=model_opt)
             model_par.eval()
             loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model_par, loss_val, tokenizer)
             print(loss)
