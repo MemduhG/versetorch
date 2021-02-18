@@ -45,15 +45,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         print(1, torch.cuda.memory_summary(device=1, abbreviated=False))
         out = model.forward(batch.src, batch.trg,
                              batch.src_mask, batch.trg_mask)
-        try:
-            loss = loss_compute(out, batch.trg_y, batch.ntokens)
-        except (AssertionError, RuntimeError):
-            print("Batch was too small and pytorch didn't broadcast it properly.")
-            if torch.cuda.device_count() < 2:
-                continue
-            else:
-                backup_loss = backup_loss = SimpleLossCompute(model.model.generator.to("cuda:1"), criterion, model_opt)
-                loss = backup_loss(out.to("cuda:1"), batch.trg_y.to("cuda:1"), batch.ntokens)
+        loss = loss_compute(out, batch.trg_y, batch.ntokens)
         total_loss += float(loss)  # this might be the problem
         del out
         print("Step", i, "after deleting out", torch.cuda.memory_allocated(0))

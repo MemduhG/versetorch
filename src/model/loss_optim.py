@@ -17,11 +17,13 @@ class MultiGPULossCompute:
         self.devices = devices
         self.chunk_size = chunk_size
 
+        self.criteria = [nn.parallel.replicate(criterion, devices=devices[:i + 1]) for i in range(len(devices))]
+        self.generators = [nn.parallel.replicate(generator, devices=devices[:i + 1]) for i in range(len(devices))]
 
     def __call__(self, out, targets, normalize):
         total = 0.0
-        generator = nn.parallel.replicate(self.generator,
-                                          devices=self.devices)
+# 0        generator = nn.parallel.replicate(self.generator,
+#                                           devices=self.devices)
         out_scatter = nn.parallel.scatter(out,
                                           target_gpus=self.devices)
         out_grad = [[] for _ in out_scatter]
@@ -36,13 +38,13 @@ class MultiGPULossCompute:
             out_column = [[Variable(o[:, i:i + chunk_size].data,
                                     requires_grad=self.opt is not None)]
                           for o in out_scatter]
-            gen = nn.parallel.parallel_apply(generator, out_column)
+            gen = nn.parallel.parallel_apply(self.generators[i], out_column)
 
             # Compute loss.
             y = [(g.contiguous().view(-1, g.size(-1)),
                   t[:, i:i + chunk_size].contiguous().view(-1))
                  for g, t in zip(gen, targets)]
-            loss = nn.parallel.parallel_apply(self.criterion, y)
+            loss = nn.parallel.parallel_apply(self.criteria[i], y)
 
             # Sum and normalize loss
             l = nn.parallel.gather(loss,
@@ -66,6 +68,7 @@ class MultiGPULossCompute:
             self.opt.step()
             self.opt.optimizer.zero_grad()
         return total * normalize
+
 
 class SimpleLossCompute:
     "A simple loss compute and train function."
