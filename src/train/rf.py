@@ -20,12 +20,10 @@ crit = nn.CrossEntropyLoss()
 tokenizer = get_tokenizer("tr")
 
 with open("data/tr/tur.train.src", encoding="utf-8") as infile:
-    src_raw = [torch.LongTensor(tokenizer.EncodeAsIds(infile.readline().strip())) for x in range(10)]
+    src_raw = [torch.LongTensor([0] + tokenizer.EncodeAsIds(infile.readline().strip()) + [1]) for x in range(10)]
 
 with open("data/tr/tur.train.tgt", encoding="utf-8") as infile:
-    tgt_raw = [torch.LongTensor(tokenizer.EncodeAsIds(infile.readline().strip())) for x in range(10)]
-
-
+    tgt_raw = [torch.LongTensor([0] + tokenizer.EncodeAsIds(infile.readline().strip()) + [1]) for x in range(10)]
 
 
 from reformer_pytorch import ReformerEncDec
@@ -43,8 +41,8 @@ enc_dec = ReformerEncDec(
     dec_max_seq_len = EN_SEQ_LEN
 ).cuda()
 
-train_seq_in = torch.transpose(nn.utils.rnn.pad_sequence(src_raw, padding_value=3), 0, 1).cuda()
-train_seq_out = torch.transpose(nn.utils.rnn.pad_sequence(tgt_raw, padding_value=3), 0, 1).cuda()
+train_seq_in = torch.transpose(nn.utils.rnn.pad_sequence(src_raw, padding_value=3), 0, 1).cuda() # 10, 117
+train_seq_out = torch.transpose(nn.utils.rnn.pad_sequence(tgt_raw, padding_value=3), 0, 1).cuda() # 10 439
 print(train_seq_in.shape, train_seq_out.shape)
 input_mask = torch.ones(train_seq_in.shape[0], train_seq_in.shape[1]).bool().cuda()
 print(input_mask.shape)
