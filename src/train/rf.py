@@ -20,10 +20,10 @@ crit = nn.CrossEntropyLoss()
 tokenizer = get_tokenizer("tr")
 
 with open("data/tr/tur.train.src", encoding="utf-8") as infile:
-    src_raw = [torch.LongTensor([0] + tokenizer.EncodeAsIds(infile.readline().strip()) + [1]) for x in range(10)]
+    src_raw = [torch.LongTensor([1] + tokenizer.EncodeAsIds(infile.readline().strip()) + [2]) for x in range(10)]
 
 with open("data/tr/tur.train.tgt", encoding="utf-8") as infile:
-    tgt_raw = [torch.LongTensor([0] + tokenizer.EncodeAsIds(infile.readline().strip()) + [1]) for x in range(10)]
+    tgt_raw = [torch.LongTensor([1] + tokenizer.EncodeAsIds(infile.readline().strip()) + [2]) for x in range(10)]
 
 
 from reformer_pytorch import ReformerEncDec
