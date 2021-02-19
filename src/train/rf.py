@@ -19,10 +19,10 @@ crit = nn.CrossEntropyLoss()
 
 tokenizer = get_tokenizer("tr")
 
-with open("data/tr/tur.train.src") as infile:
+with open("data/tr/tur.train.src", encoding="utf-8") as infile:
     src_raw = [torch.LongTensor(tokenizer.EncodeAsIds(infile.readline().strip())) for x in range(10)]
 
-with open("data/tr/tur.train.tgt") as infile:
+with open("data/tr/tur.train.tgt", encoding="utf-8") as infile:
     tgt_raw = [torch.LongTensor(tokenizer.EncodeAsIds(infile.readline().strip())) for x in range(10)]
 
 
