@@ -32,13 +32,15 @@ DE_SEQ_LEN = 1024
 EN_SEQ_LEN = 1024
 
 enc_dec = ReformerEncDec(
-    dim = 512,
-    enc_num_tokens = 32000,
-    enc_depth = 6,
-    enc_max_seq_len = DE_SEQ_LEN,
-    dec_num_tokens = 32000,
-    dec_depth = 6,
-    dec_max_seq_len = EN_SEQ_LEN
+    dim=512,
+    enc_num_tokens=32000,
+    enc_depth=6,
+    enc_max_seq_len=DE_SEQ_LEN,
+    dec_num_tokens=32000,
+    dec_depth=6,
+    dec_max_seq_len=EN_SEQ_LEN,
+    ignore_index=3,
+    pad_value=3
 ).cuda()
 
 train_seq_in = torch.transpose(nn.utils.rnn.pad_sequence(src_raw, padding_value=3), 0, 1).cuda() # 10, 117
