@@ -4,9 +4,11 @@ import sys, os
 import sentencepiece as spm
 from reformer_pytorch import ReformerLM
 
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.utils.utils import get_tokenizer
+from src.model.model import NoamOpt
 
 
 from src.data_utils.data import get_training_iterators
@@ -50,10 +52,16 @@ input_mask = train_seq_in != 3
 print(train_seq_in)
 print(input_mask)
 
+opt = NoamOpt(512, 1, 2000,
+                        torch.optim.Adam(enc_dec.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+
+
 for i in range(1000):
-    loss = enc_dec(train_seq_in, train_seq_out, return_loss = True, enc_input_mask = input_mask)
+    loss = enc_dec(train_seq_in, train_seq_out, return_loss=True, enc_input_mask=input_mask)
     print(loss)
     loss.backward()
+    opt.step()
+
 # learn
 #
 # # evaluate with the following
