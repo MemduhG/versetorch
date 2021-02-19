@@ -45,6 +45,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
                                  batch.src_mask.to("cuda"), batch.trg_mask.to("cuda"))
             except RuntimeError:
                 print("OOM - skipping batch", i)
+                print("SRC shape:", batch.src.shape(), "TGT shape:", batch.tgt.shape())
                 continue
         else:
             out = model.forward(batch.src, batch.trg,
