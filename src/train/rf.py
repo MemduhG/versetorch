@@ -41,10 +41,10 @@ enc_dec = ReformerEncDec(
     dec_max_seq_len=EN_SEQ_LEN,
     ignore_index=3,
     pad_value=3
-)#.cuda()
+).cuda()
 
-train_seq_in = torch.transpose(nn.utils.rnn.pad_sequence(src_raw, padding_value=3), 0, 1)#.cuda() # 10, 117
-train_seq_out = torch.transpose(nn.utils.rnn.pad_sequence(tgt_raw, padding_value=3), 0, 1)#.cuda() # 10 439
+train_seq_in = torch.transpose(nn.utils.rnn.pad_sequence(src_raw, padding_value=3), 0, 1).cuda() # 10, 117
+train_seq_out = torch.transpose(nn.utils.rnn.pad_sequence(tgt_raw, padding_value=3), 0, 1).cuda() # 10 439
 print(train_seq_in.shape, train_seq_out.shape)
 input_mask = train_seq_in != 3
 print(train_seq_in)
