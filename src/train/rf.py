@@ -10,7 +10,7 @@ from src.model.model import NoamOpt
 from src.data_utils.data import get_training_iterators
 
 
-MAX_SEQ_LEN = 1024
+MAX_SEQ_LEN = 4096
 
 enc_dec = ReformerEncDec(dim=512, enc_num_tokens=32000, enc_depth=6, enc_max_seq_len=MAX_SEQ_LEN, dec_num_tokens=32000,
                          dec_depth=6, dec_max_seq_len=MAX_SEQ_LEN, ignore_index=3, pad_value=3).cuda()
