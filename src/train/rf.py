@@ -2,11 +2,11 @@ import torch
 import sys
 import os
 from reformer_pytorch import ReformerEncDec
-from src.utils.utils import get_tokenizer
-from src.model.model import NoamOpt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
+from src.utils.utils import get_tokenizer
+from src.model.model import NoamOpt
 from src.data_utils.data import get_training_iterators
 
 
