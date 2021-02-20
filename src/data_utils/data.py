@@ -71,13 +71,13 @@ def get_training_iterators(dataset):
     batch_size = 4096
     train, val, test = get_dataset(dataset)
 
-    train_iter = MyIterator(train, batch_size=batch_size, device=0,
+    train_iter = MyIterator(train, batch_size=batch_size, device="cpu",
                             repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                             batch_size_fn=batch_size_fn, train=True)
-    valid_iter = MyIterator(val, batch_size=batch_size, device=0,
+    valid_iter = MyIterator(val, batch_size=batch_size, device="cpu",
                             repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                             batch_size_fn=batch_size_fn, train=False, sort=True)
-    test_iter = MyIterator(test, batch_size=batch_size, device=0,
+    test_iter = MyIterator(test, batch_size=batch_size, device="cpu",
                            repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                            batch_size_fn=batch_size_fn, train=False, sort=True)
 
