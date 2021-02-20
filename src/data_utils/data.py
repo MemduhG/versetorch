@@ -47,7 +47,7 @@ def produce_register(dataset):
 
 
 def get_dataset(dataset):
-    languages = {"antoloji": "tr", "tur":"tr", "turkish":"tr"}
+    languages = {"antoloji": "tr", "tur": "tr", "turkish": "tr"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
 
@@ -68,20 +68,17 @@ def get_dataset(dataset):
 
 
 def get_training_iterators(dataset):
-    if torch.cuda.device_count() > 1:
-        batch_size = 3000
-    else:
-        batch_size = 512
+    batch_size = 10000
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device=0,
-                            repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+                            repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                             batch_size_fn=batch_size_fn, train=True)
     valid_iter = MyIterator(val, batch_size=batch_size, device=0,
-                            repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+                            repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                             batch_size_fn=batch_size_fn, train=False, sort=True)
     test_iter = MyIterator(test, batch_size=batch_size, device=0,
-                           repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+                           repeat=False, sort_key=lambda x: (len(x.trg), len(x.src)),
                            batch_size_fn=batch_size_fn, train=False, sort=True)
 
     train_idx, dev_idx, test_idx = produce_register(dataset)
