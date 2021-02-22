@@ -17,5 +17,5 @@ echo "#PBS -N ${step}-${dataset}" >> $script_path
 cat scripts/val_template.sh >> $script_path
 echo $params >> $script_path
 
-echo "Generated script $script_path"
+echo "Generated script $script_path for checkpoint $checkpoint"
 qsub $script_path
