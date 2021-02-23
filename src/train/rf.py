@@ -13,7 +13,7 @@ from src.utils.save import save_checkpoint, load_latest
 
 save_every=1800
 save_path="checkpoints/tur-rf"
-MAX_SEQ_LEN = 2048
+MAX_SEQ_LEN = 1024
 
 enc_dec = ReformerEncDec(dim=512, enc_num_tokens=32000, enc_depth=6, enc_max_seq_len=MAX_SEQ_LEN, dec_num_tokens=32000,
                          dec_depth=6, dec_max_seq_len=MAX_SEQ_LEN, ignore_index=3, pad_value=3).cuda()
@@ -41,6 +41,6 @@ for batch in train_iter:
     opt.optimizer.zero_grad()
     steps += 1
     if time.time() - last_saved > save_every:
+        print("Saving checkpoint at", steps, "steps with loss of", float(loss))
         save_checkpoint(enc_dec, opt, steps, save_path)
         last_saved = time.time()
-    
