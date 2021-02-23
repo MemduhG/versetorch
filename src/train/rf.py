@@ -35,7 +35,7 @@ for batch in train_iter:
     except AssertionError:
         print("Skipped overlong sample", src.shape, tgt.shape)
         continue
-    print(loss)
+    print(loss, src.shape, tgt.shape)
     loss.backward()
     opt.step()
     opt.optimizer.zero_grad()
