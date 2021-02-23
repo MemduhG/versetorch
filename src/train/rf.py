@@ -29,16 +29,19 @@ last_saved = time.time()
 
 for batch in train_iter:
     src, tgt = torch.transpose(batch.src, 0, 1).cuda(), torch.transpose(batch.trg, 0, 1).cuda()
+    print(src.shape, tgt.shape)
     input_mask = src != 3
     try:
         loss = enc_dec(src, tgt, return_loss=True, enc_input_mask=input_mask)
     except AssertionError:
         print("Skipped overlong sample", src.shape, tgt.shape)
         continue
-    print(loss, src.shape, tgt.shape)
+    print(loss)
+    print(torch.cuda.memory_summary(0))
     loss.backward()
     opt.step()
     opt.optimizer.zero_grad()
+    print(torch.cuda.memory_summary(0))
     steps += 1
     if time.time() - last_saved > save_every:
         print("Saving checkpoint at", steps, "steps with loss of", float(loss))
