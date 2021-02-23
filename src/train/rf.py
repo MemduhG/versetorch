@@ -11,9 +11,9 @@ from src.model.model import NoamOpt
 from src.data_utils.data import get_training_iterators
 from src.utils.save import save_checkpoint, load_latest
 
-save_every=1800
-save_path="checkpoints/tur-rf"
-MAX_SEQ_LEN = 1024
+save_every = 1800
+save_path = "checkpoints/tur-rf"
+MAX_SEQ_LEN = 512
 
 enc_dec = ReformerEncDec(dim=512, enc_num_tokens=32000, enc_depth=6, enc_max_seq_len=MAX_SEQ_LEN, dec_num_tokens=32000,
                          dec_depth=6, dec_max_seq_len=MAX_SEQ_LEN, ignore_index=3, pad_value=3).cuda()
