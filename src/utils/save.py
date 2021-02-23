@@ -7,13 +7,13 @@ def save_checkpoint(model, opt, steps, save_path):
         os.makedirs(save_path)
     save_file = save_path + "/" + str(steps) + ".pt"
     torch.save({'model_state_dict': model.state_dict(),
-    'optimizer_state_dict': opt.optimizer.state_dict()}, save_file)
+    'optimizer_state_dict': opt.state_dict()}, save_file)
 
 
 def load_checkpoint(file_path, model, opt):
     checkpoint = torch.load(file_path)
     model.load_state_dict(checkpoint['model_state_dict'])
-    opt.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    opt.load_state_dict(checkpoint['optimizer_state_dict'])
 
 
 def load_latest(save_path, model, model_opt):

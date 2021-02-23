@@ -3,6 +3,7 @@ import sys
 import os
 import time
 from reformer_pytorch import ReformerEncDec
+from transformers.optimization import Adafactor
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -18,7 +19,18 @@ MAX_SEQ_LEN = 512
 enc_dec = ReformerEncDec(dim=512, enc_num_tokens=32000, enc_depth=6, enc_max_seq_len=MAX_SEQ_LEN, dec_num_tokens=32000,
                          dec_depth=6, dec_max_seq_len=MAX_SEQ_LEN, ignore_index=3, pad_value=3).cuda()
 
-opt = NoamOpt(512, 1, 2000, torch.optim.Adam(enc_dec.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+opt = Adafactor(
+    enc_dec.parameters(),
+    lr=1e-3,
+    eps=(1e-30, 1e-3),
+    clip_threshold=1.0,
+    decay_rate=-0.8,
+    beta1=None,
+    weight_decay=0.0,
+    relative_step=False,
+    scale_parameter=False,
+    warmup_init=False
+)
 
 tokenizer = get_tokenizer("tr")
 train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators("tur")
@@ -37,11 +49,9 @@ for batch in train_iter:
         print("Skipped overlong sample", src.shape, tgt.shape)
         continue
     print(loss)
-    print(torch.cuda.memory_summary(0))
     loss.backward()
     opt.step()
-    opt.optimizer.zero_grad()
-    print(torch.cuda.memory_summary(0))
+    opt.zero_grad()
     steps += 1
     if time.time() - last_saved > save_every:
         print("Saving checkpoint at", steps, "steps with loss of", float(loss))
