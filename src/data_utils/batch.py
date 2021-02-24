@@ -36,8 +36,8 @@ class MyIterator(data.Iterator):
 
         if self.train:
             def pool(d, random_shuffler):
-                for p in data.batch(d, self.batch_size * 100):
-                    p_batch = data.batch(
+                for p in batch(d, self.batch_size * 100):
+                    p_batch = batch(
                         sorted(p, key=self.sort_key),
                         self.batch_size, self.batch_size_fn)
                     for b in random_shuffler(list(p_batch)):
@@ -51,13 +51,13 @@ class MyIterator(data.Iterator):
             self.indices = []
             self.batches = []
             xs = sorted(indexed_data, key=self.indexed_sort_key)
-            for b in data.batch(xs, self.batch_size, indexed_bsz_fn):
+            for b in batch(xs, self.batch_size, indexed_bsz_fn):
                 sorted_batch = sorted(b, key=lambda x: self.sort_key(x[1]))
                 self.batches.append([x[1] for x in sorted_batch])
                 self.indices.extend([x[0] for x in sorted_batch])
 
 
-def batch(data, batch_size, max_len=512, batch_size_fn=None):
+def batch(data, batch_size, batch_size_fn=None, max_len=512):
     """Yield elements from data in chunks of batch_size."""
     if batch_size_fn is None:
         def batch_size_fn(new, count, sofar):
