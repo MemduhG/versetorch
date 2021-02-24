@@ -39,7 +39,7 @@ for batch in train_iter:
     try:
         loss = enc_dec(src, tgt, return_loss=True, enc_input_mask=input_mask)
     except AssertionError:
-        print("Skipped overlong sample", src.shape, tgt.shape)
+        print("Skipped overlong sample while training", src.shape, tgt.shape)
         continue
     print(loss)
     loss.backward()

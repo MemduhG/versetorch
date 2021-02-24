@@ -57,6 +57,27 @@ class MyIterator(data.Iterator):
                 self.indices.extend([x[0] for x in sorted_batch])
 
 
+def batch(data, batch_size, max_len=512, batch_size_fn=None):
+    """Yield elements from data in chunks of batch_size."""
+    if batch_size_fn is None:
+        def batch_size_fn(new, count, sofar):
+            return count
+    minibatch, size_so_far = [], 0
+    for ex in data:
+        if len(ex.src) > max_len or len(ex.trg) > max_len:
+            print("Skipped overlong sample while batching.")
+            continue
+        minibatch.append(ex)
+        size_so_far = batch_size_fn(ex, len(minibatch), size_so_far)
+        if size_so_far == batch_size:
+            yield minibatch
+            minibatch, size_so_far = [], 0
+        elif size_so_far > batch_size:
+            yield minibatch[:-1]
+            minibatch, size_so_far = minibatch[-1:], batch_size_fn(ex, 1, 0)
+    if minibatch:
+        yield minibatch
+
 
 def rebatch(pad_idx, batch):
     """Fix order in torchtext to match ours"""
