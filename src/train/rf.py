@@ -14,7 +14,7 @@ from src.utils.save import save_checkpoint, load_latest
 
 save_every = 1800
 save_path = "checkpoints/tur-rf"
-MAX_SEQ_LEN = 512
+MAX_SEQ_LEN = 1024
 
 device = 0 if torch.cuda.device_count() > 0 else "cpu"
 
