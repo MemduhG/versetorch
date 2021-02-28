@@ -68,7 +68,7 @@ def get_dataset(dataset):
 
 
 def get_training_iterators(dataset):
-    batch_size = 4000
+    batch_size = 3000
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device="cpu",
