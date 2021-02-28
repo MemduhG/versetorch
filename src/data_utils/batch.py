@@ -46,15 +46,11 @@ class MyIterator(data.Iterator):
             self.batches = pool(self.data(), self.random_shuffler)
 
         else:
-            indexed_data = [(c, x) for c, x in enumerate(self.dataset)]
-
-            self.indices = []
             self.batches = []
-            xs = sorted(indexed_data, key=self.indexed_sort_key)
-            for b in batch(xs, self.batch_size, indexed_bsz_fn):
-                sorted_batch = sorted(b, key=lambda x: self.sort_key(x[1]))
-                self.batches.append([x[1] for x in sorted_batch])
-                self.indices.extend([x[0] for x in sorted_batch])
+            for b in data.batch(self.data(), self.batch_size,
+                                self.batch_size_fn):
+                self.batches.append(sorted(b, key=self.sort_key))
+
 
 
 def batch(data, batch_size, batch_size_fn=None, max_len=512):

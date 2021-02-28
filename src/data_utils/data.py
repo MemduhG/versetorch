@@ -1,4 +1,4 @@
-from src.model.model import batch_size_fn
+from src.model.model import batch_size_fn, batch_size_val
 from src.data_utils.batch import MyIterator
 from torchtext import data, datasets
 from src.utils.utils import get_tokenizer
@@ -19,7 +19,7 @@ def get_dataset_strings(dataset):
     language = languages[dataset]
     train = each_line('data/{}/{}.{}.src'.format(language, dataset, "train"))
     dev = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
-    test = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
+    test = each_line('data/{}/{}.{}.src'.format(language, dataset, "test"))
 
     return train, dev, test
 
@@ -44,6 +44,12 @@ def produce_register(dataset):
     dev_indices = {tuple(item): c for c, item in enumerate(dev)}
     test_indices = {tuple(item): c for c, item in enumerate(test)}
     return train_indices, dev_indices, test_indices
+
+def file_register(dataset):
+    train, dev, test = get_tokenized_dataset(dataset)
+    train_indices = {tuple(item): c for c, item in enumerate(train)}
+    dev_indices = {tuple(item): c for c, item in enumerate(dev)}
+    test_indices = {tuple(item): c for c, item in enumerate(test)}
 
 
 def get_dataset(dataset):
@@ -84,6 +90,29 @@ def get_training_iterators(dataset):
     train_idx, dev_idx, test_idx = produce_register(dataset)
 
     return train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx
+
+
+def make_val_iterator(fpath, tokenizer):
+    batch_size = 1024
+
+    dev = each_line(fpath)
+    dev_indices = dict()
+
+    def tok(seq):
+        return tokenizer.EncodeAsIds(seq)
+
+    for c, item in enumerate(dev):
+        tup = tuple([1] + tok(item) + [2])
+        dev_indices[tup] = c
+
+    field = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
+    ds = data.TabularDataset(fpath, "tsv", [("src", field)], skip_header=True)
+    valid_iter = MyIterator(ds, batch_size=batch_size, device="cpu",
+                            repeat=False, sort_key=lambda x: (x.src),
+                            batch_size_fn=batch_size_val, train=False, sort=True)
+
+
+    return valid_iter, dev_indices
 
 
 if __name__ == "__main__":
