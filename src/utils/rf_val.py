@@ -25,7 +25,6 @@ enc_dec = ReformerEncDec(dim=512, enc_num_tokens=32000, enc_depth=6, enc_max_seq
 optim = Adafactor(enc_dec.parameters())
 
 
-
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--ckpt")
 arg_parser.add_argument("--input")

@@ -87,7 +87,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
 
 def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_name=None):
-    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset)
+    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset, batch_size=2000)
     if config_name is None:
         config_name = "baseline"
     save_path = "checkpoints/" + dataset + "-" + config_name
@@ -124,7 +124,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
             print(loss)
     else:
         print("Training with 1 GPU.")
-        model = model.to("cuda:0")
+        model = model.to(device)
         loss_train = SimpleLossCompute(model.generator, criterion, model_opt)
         loss_val = SimpleLossCompute(model.generator, criterion, None)
         for epoch in range(epochs):

@@ -73,8 +73,7 @@ def get_dataset(dataset):
     return mt_train, mt_dev, mt_test
 
 
-def get_training_iterators(dataset):
-    batch_size = 3000
+def get_training_iterators(dataset, batch_size=3000):
     train, val, test = get_dataset(dataset)
 
     train_iter = MyIterator(train, batch_size=batch_size, device="cpu",
@@ -92,8 +91,7 @@ def get_training_iterators(dataset):
     return train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx
 
 
-def make_val_iterator(fpath, tokenizer):
-    batch_size = 1024
+def make_val_iterator(fpath, tokenizer, batch_size=1024):
 
     dev = each_line(fpath)
     dev_indices = dict()
@@ -108,9 +106,8 @@ def make_val_iterator(fpath, tokenizer):
     field = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
     ds = data.TabularDataset(fpath, "tsv", [("src", field)], skip_header=True)
     valid_iter = MyIterator(ds, batch_size=batch_size, device="cpu",
-                            repeat=False, sort_key=lambda x: (x.src),
+                            repeat=False, sort_key=lambda x: len(x.src),
                             batch_size_fn=batch_size_val, train=False, sort=True)
-
 
     return valid_iter, dev_indices
 
