@@ -39,6 +39,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         # out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
         #                     batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
         # loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
+        print(batch.src.shape, batch.trg.shape)
         if torch.cuda.device_count() == 1:
             try:
                 out = model.forward(batch.src.to("cuda"), batch.trg.to("cuda"),
@@ -87,7 +88,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
 
 def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_name=None):
-    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset, batch_size=2000)
+    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset, batch_size=4500)
     if config_name is None:
         config_name = "baseline"
     save_path = "checkpoints/" + dataset + "-" + config_name

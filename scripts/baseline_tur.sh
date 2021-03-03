@@ -1,7 +1,7 @@
 #!/bin/bash -v
 #PBS -q gpu
 #PBS -N versetorch
-#PBS -l select=1:ncpus=2:ngpus=2:mem=20gb:scratch_local=10gb:cl_adan=True
+#PBS -l select=1:ncpus=2:ngpus=1:mem=20gb:scratch_local=10gb:cl_adan=True
 #PBS -l walltime=24:00:00 
 #PBS -j oe
 
