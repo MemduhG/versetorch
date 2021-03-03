@@ -1,8 +1,8 @@
 import sentencepiece as spm
 import sacrebleu
 
-tokenizer_data_files = {"tr": "data/spm/tr.txt"}
-tokenizer_model_paths = {"tr": "data/spm/tr.model"}
+tokenizer_data_files = {"tr": "data/spm/tr.txt", "cz": "data/spm/cz.txt", "en": "data/spm/en.txt"}
+tokenizer_model_paths = {"tr": "data/spm/tr.model", "cz": "data/spm/cz.model", "en": "data/spm/en.model"}
 
 dataset_to_tok = {"antoloji": "tr", "tur": "tr"}
 
@@ -24,7 +24,7 @@ def get_tokenizer(tokenizer_name: str, vocab_size=32000):
         sp_model.Load(tokenizer_model_paths[tokenizer_name])
     except OSError:
         spm_training_string = "--input={} --vocab_size={} --model_prefix={} \
-                               --model_type={} --pad_id=3".format(tokenizer_data_files[tokenizer_name], vocab_size,
+                               --model_type={} --pad_id=3".format(data_paths[tokenizer_name]["tgt"], vocab_size,
                                                                   "data/spm/" + tokenizer_name, "unigram")
         spm.SentencePieceTrainer.train(spm_training_string)
         sp_model.Load(tokenizer_model_paths[tokenizer_name])
