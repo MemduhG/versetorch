@@ -8,8 +8,13 @@ dataset_to_tok = {"antoloji": "tr", "tur": "tr"}
 
 data_paths = {"antoloji": {"src": "data/tr/antoloji.train.prose", "tgt": "data/tr/antoloji.train.poetry",
                            "dev_src": "data/tr/antoloji.dev.prose", "dev_tgt": "data/tr/antoloji.dev.poetry"},
-              "tur": {"src": "data/tr/tur.train.src", "tgt": "data/tr/tur.train.tgt", "dev_src": "data/tr/tur.dev.src",
-                      "dev_tgt": "data/tr/tur.dev.tgt"}}
+              "tr": {"src": "data/tr/tur.train.src", "tgt": "data/tr/tur.train.tgt", "dev_src": "data/tr/tur.dev.src",
+                      "dev_tgt": "data/tr/tur.dev.tgt"},
+              "cz": {"src": "data/cz/cz.train.src", "tgt": "data/cz/cz.train.tgt", "dev_src": "data/cz/cz.dev.src",
+                      "dev_tgt": "data/cz/cz.dev.tgt"},
+              "en": {"src": "data/en/eng.train.src", "tgt": "data/en/eng.train.tgt", "dev_src": "data/en/eng.dev.src",
+                     "dev_tgt": "data/en/eng.dev.tgt"}
+              }
 
 
 def get_tokenizer(tokenizer_name: str, vocab_size=32000):

@@ -1,5 +1,5 @@
 #!/storage/praha1/home/memduh/versetorch/venv python
-
+import argparse
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -137,5 +137,10 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
 
 
 if __name__ == "__main__":
-    tokenizer = get_tokenizer("tr")
-    run_training("tur", tokenizer)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="tur")
+    args = parser.parse_args()
+    dataset_lang = {"tur": "tr", "eng": "en", "cz": "cz"}
+    tokenizer = get_tokenizer(dataset_lang[args.dataset])
+    run_training(args.dataset, tokenizer)
+

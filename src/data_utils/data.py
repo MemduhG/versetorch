@@ -15,7 +15,7 @@ def each_line(fname):
 
 
 def get_dataset_strings(dataset):
-    languages = {"antoloji": "tr", "tur": "tr"}
+    languages = {"antoloji": "tr", "tur": "tr", "cz": "cz", "eng": "en"}
     language = languages[dataset]
     train = each_line('data/{}/{}.{}.src'.format(language, dataset, "train"))
     dev = each_line('data/{}/{}.{}.src'.format(language, dataset, "dev"))
@@ -30,7 +30,7 @@ def tokenize_string(string, tokenizer):
 
 def get_tokenized_dataset(dataset):
     train, dev, test = get_dataset_strings(dataset)
-    languages = {"antoloji": "tr", "tur": "tr"}
+    languages = {"antoloji": "tr", "tur": "tr", "eng": "en"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
     train_set = [tokenize_string(x, tokenizer) for x in train]
@@ -53,7 +53,7 @@ def file_register(dataset):
 
 
 def get_dataset(dataset):
-    languages = {"antoloji": "tr", "tur": "tr", "turkish": "tr"}
+    languages = {"antoloji": "tr", "tur": "tr", "cz": "cz", "turkish": "tr", "eng": "en"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
 
