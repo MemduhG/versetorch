@@ -25,7 +25,7 @@ def translate_devset(args):
     val_iter = (rebatch(pad_idx, b) for b in val_iter)
     decoded = [""] * len(val_indices)
     for batch in val_iter:
-        out = greedy_decode(model, batch.src, batch.src_mask, max_len=256, start_symbol=1)
+        out = greedy_decode(model, batch.src, batch.src_mask, max_len=args.max_len, start_symbol=1)
         for c, decoded_row in enumerate(out):
             src_seq = [x for x in batch.src[:, c].tolist() if x != 3]
             index = val_indices[tuple(src_seq)]
@@ -42,5 +42,6 @@ if __name__ == "__main__":
     parser.add_argument("--language", type=str, required=True)
     parser.add_argument("--output", type=str, required=True)
     parser.add_argument("--checkpoint", type=str, required=True)
+    parser.add_argument("--max_len", type=int, required=True)
     args = parser.parse_args()
     translate_devset(args)
