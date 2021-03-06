@@ -52,7 +52,7 @@ class MyIterator(data.Iterator):
                 self.batches.append(sorted(b, key=self.sort_key))
 
 
-def batch(data, batch_size, batch_size_fn=None, max_len=128):
+def batch(data, batch_size, batch_size_fn=None, max_len=1024):
     """Yield elements from data in chunks of batch_size."""
     if batch_size_fn is None:
         def batch_size_fn(new, count, sofar):
