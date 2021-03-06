@@ -83,4 +83,4 @@ def rebatch(pad_idx, batch):
 
 def rebatch_single(pad_idx, batch):
     src = batch.src.transpose(0, 1)
-    return Batch(src, pad_idx)
+    return Batch(src, pad=pad_idx)
