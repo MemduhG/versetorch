@@ -20,7 +20,7 @@ def translate_devset(args):
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     tokenizer = get_tokenizer(args.language)
-    val_iter, val_indices = make_val_iterator(args.input, tokenizer)
+    val_iter, val_indices = make_val_iterator(args.input, tokenizer, batch_size=512)
     pad_idx = 3
     val_iter = (rebatch_single(pad_idx, b) for b in val_iter)
     decoded = [""] * len(val_indices)
