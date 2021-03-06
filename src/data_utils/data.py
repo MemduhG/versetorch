@@ -91,7 +91,7 @@ def get_training_iterators(dataset, batch_size=3000):
     return train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx
 
 
-def make_val_iterator(fpath, tokenizer, batch_size=1024):
+def make_val_iterator(fpath, tokenizer, batch_size=256):
 
     dev = each_line(fpath)
     dev_indices = dict()
