@@ -79,3 +79,8 @@ def rebatch(pad_idx, batch):
     """Fix order in torchtext to match ours"""
     src, trg = batch.src.transpose(0, 1), batch.trg.transpose(0, 1)
     return Batch(src, trg, pad_idx)
+
+
+def rebatch_single(pad_idx, batch):
+    src = batch.src.transpose(0, 1)
+    return Batch(src, pad_idx)

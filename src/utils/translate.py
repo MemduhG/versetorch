@@ -5,7 +5,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from src.data_utils.batch import rebatch
+from src.data_utils.batch import rebatch_single
 from src.data_utils.data import make_val_iterator
 from src.model.model import make_model, greedy_decode
 from src.utils.utils import get_tokenizer
@@ -22,7 +22,7 @@ def translate_devset(args):
     tokenizer = get_tokenizer(args.language)
     val_iter, val_indices = make_val_iterator(args.input, tokenizer)
     pad_idx = 3
-    val_iter = (rebatch(pad_idx, b) for b in val_iter)
+    val_iter = (rebatch_single(pad_idx, b) for b in val_iter)
     decoded = [""] * len(val_indices)
     for batch in val_iter:
         out = greedy_decode(model, batch.src, batch.src_mask, max_len=args.max_len, start_symbol=1)
