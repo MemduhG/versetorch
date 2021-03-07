@@ -16,7 +16,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def translate_devset(args):
     save_to = args.output
     model = make_model(32000, 32000, N=6).to(device)
-    checkpoint = torch.load(args.checkpoint)
+    try:
+        checkpoint = torch.load(args.checkpoint)
+    except RuntimeError:
+        checkpoint = torch.load(args.checkpoint, map_location = torch.device('cpu'))
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
     tokenizer = get_tokenizer(args.language)
@@ -26,11 +29,18 @@ def translate_devset(args):
     decoded = [""] * len(val_indices)
     for batch in val_iter:
         out = greedy_decode(model, batch.src, batch.src_mask, max_len=args.max_len, start_symbol=1)
-        for c, decoded_row in enumerate(out.transpose(0, 1)):
-            src_seq = [x for x in batch.src[:, c].tolist() if x != 3]
+        for c, decoded_row in enumerate(out):
+            src_seq = [x for x in batch.src[c, :].tolist() if x != 3]
             index = val_indices[tuple(src_seq)]
-            decoded[index] = decoded_row
+            to_spm = []
+            for item in decoded_row:
+                if item == 2:
+                    break
+                to_spm.append(item)
+            decoded_string = tokenizer.Decode(decoded_row.tolist())
+            decoded[index] = decoded_string
 
+    # TODO cutoff at line end and actually decode
     with open(save_to, "w", encoding="utf-8") as outfile:
         for line in decoded:
             outfile.writelines(line + "\n")
