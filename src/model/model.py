@@ -373,10 +373,11 @@ class LabelSmoothing(nn.Module):
         return self.criterion(x, Variable(true_dist, requires_grad=False))
 
 
-def greedy_decode(model, src, src_mask, max_len, start_symbol):
+def greedy_decode(model, src, src_mask, max_len, start_symbol, end_symbol=2):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     memory = model.encode(src.to(device), src_mask.to(device))
     ys = torch.ones(src.shape[0], 1).fill_(start_symbol).type_as(src.data).to(device)
+    finished = torch.zeros((src.shape[0], 1))
     for i in range(max_len-1):
         out = model.decode(memory, src_mask,
                            Variable(ys).to(device),
@@ -384,6 +385,12 @@ def greedy_decode(model, src, src_mask, max_len, start_symbol):
         prob = model.generator(out[:, -1])
         _, next_word = torch.max(prob, dim = 1)
         # next_word = next_word.data_utils[0]
-        ys = torch.cat([ys, next_word.unsqueeze(1)], dim=1)
+        unsqueezed = next_word.unsqueeze(1)
+        for c, token in enumerate(unsqueezed):
+            if token == end_symbol:
+                finished[c] = 1
+        if sum(finished) >= src.shape[0]:
+            break
+        ys = torch.cat([ys, unsqueezed], dim=1)
                         # torch.ones(src.shape[0], 1).type_as(src.data_utils).fill_(next_word).to(device)], dim=1)
     return ys
