@@ -30,7 +30,12 @@ def translate_devset(args):
     for batch in val_iter:
         out = greedy_decode(model, batch.src, batch.src_mask, max_len=args.max_len, start_symbol=1)
         for c, decoded_row in enumerate(out):
-            src_seq = [x for x in batch.src[c, :].tolist() if x != 3]
+            padded_src = batch.src[c, :].tolist()
+            src_seq = []
+            for item in padded_src:
+                if item == 3:
+                    break
+                src_seq.append(item)
             index = val_indices[tuple(src_seq)]
             to_spm = []
             for item in decoded_row:

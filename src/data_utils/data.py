@@ -2,6 +2,7 @@ from src.model.model import batch_size_fn, batch_size_val
 from src.data_utils.batch import MyIterator
 from torchtext import data, datasets
 from src.utils.utils import get_tokenizer
+import torchtext as tt
 
 import torch
 
@@ -104,10 +105,13 @@ def make_val_iterator(fpath, tokenizer, batch_size=256):
         dev_indices[tup] = c
 
     field = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
-    ds = data.TabularDataset(fpath, "tsv", [("src", field)], skip_header=True)
+    #ds = data.TabularDataset(fpath, "tsv", [("src", field)], skip_header=True)
+
+    examples = [tt.data.Example.fromdict({"src": x}, {"src": ("src", field)}) for x in dev]
+    ds = tt.data.Dataset(examples, {"src": field})
     valid_iter = MyIterator(ds, batch_size=batch_size, device="cpu",
-                            repeat=False, sort_key=lambda x: len(x.src),
-                            batch_size_fn=batch_size_val, train=False, sort=True)
+                             repeat=False, sort_key=lambda x: len(x.src),
+                             batch_size_fn=batch_size_val, train=False, sort=True)
 
     return valid_iter, dev_indices
 
