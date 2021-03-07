@@ -26,7 +26,7 @@ def translate_devset(args):
     decoded = [""] * len(val_indices)
     for batch in val_iter:
         out = greedy_decode(model, batch.src, batch.src_mask, max_len=args.max_len, start_symbol=1)
-        for c, decoded_row in enumerate(out):
+        for c, decoded_row in enumerate(out.transpose(0, 1)):
             src_seq = [x for x in batch.src[:, c].tolist() if x != 3]
             index = val_indices[tuple(src_seq)]
             decoded[index] = decoded_row
