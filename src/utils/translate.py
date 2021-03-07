@@ -44,7 +44,7 @@ def translate_devset(args):
                 to_spm.append(item)
             decoded_string = tokenizer.Decode(decoded_row.tolist())
             decoded[index] = decoded_string
-            print(decoded_string)
+            print(decoded_string.encode('utf8') )
         print("Decoded batch of", batch.src.shape)
 
 
