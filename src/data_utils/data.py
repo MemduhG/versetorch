@@ -102,11 +102,10 @@ def make_val_iterator(fpath, tokenizer, batch_size=256):
 
     for c, item in enumerate(dev):
         tup = tuple([1] + tok(item) + [2])
-        if tup in dev_indices:
-            print("PROBLEM")
         dev_indices[tup] = c
 
     field = data.Field(tokenize=tok, init_token=1, eos_token=2, pad_token=3, use_vocab=False)
+    #ds = data.TabularDataset(fpath, "tsv", [("src", field)], skip_header=True)
 
     examples = [tt.data.Example.fromdict({"src": x}, {"src": ("src", field)}) for x in dev]
     ds = tt.data.Dataset(examples, {"src": field})
