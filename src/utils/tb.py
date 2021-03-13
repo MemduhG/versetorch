@@ -30,6 +30,7 @@ for experiment in experiments:
         with open(os.path.join(exp_path, translation), "r", encoding="utf-8") as infile:
             for line in infile:
                 system_output.append(line.strip())
+            print(experiment, translation, len(system_output), len(ref))
             bleu = sacrebleu.corpus_bleu(system_output, ref)
 
     writer.add_scalar(experiment, bleu, steps)
