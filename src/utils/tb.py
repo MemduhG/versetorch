@@ -24,14 +24,14 @@ experiments = os.listdir("translations")
 for experiment in experiments:
     ref = references[experiment]
     exp_path = os.path.join("translations", experiment)
-    for translation in sorted(os.listdir(exp_path), key=lambda x: int(x.partition(".")[0])):
-        steps = int(translation.partition(".")[0])
+    for translation in sorted(os.listdir(exp_path), key=lambda x: int(x)):
+        steps = int(translation)
         system_output = []
         with open(os.path.join(exp_path, translation), "r", encoding="utf-8") as infile:
             for line in infile:
                 system_output.append(line.strip())
-            print(experiment, translation, len(system_output), len(ref))
-            bleu = sacrebleu.corpus_bleu(system_output, ref)
+            bleu = sacrebleu.corpus_bleu(system_output, [ref])
+            print(experiment, translation, bleu)
 
     writer.add_scalar(experiment, bleu, steps)
 
