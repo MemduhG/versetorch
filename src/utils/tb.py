@@ -31,9 +31,9 @@ for experiment in experiments:
             for line in infile:
                 system_output.append(line.strip())
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
-            print(experiment, translation, bleu)
+            print(experiment, translation, bleu.score)
 
-    writer.add_scalar(experiment, bleu, steps)
+    writer.add_scalar(experiment, bleu.score, steps)
 
 
 writer.flush()
