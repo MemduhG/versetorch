@@ -2,6 +2,8 @@
 import argparse
 import sys
 import os
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.data_utils.batch import rebatch
@@ -9,6 +11,7 @@ from src.data_utils.data import get_training_iterators
 from src.model.loss_optim import MultiGPULossCompute, SimpleLossCompute
 from src.model.model import make_model, NoamOpt, LabelSmoothing, translate_sentence
 from src.utils.utils import get_tokenizer
+from src.utils.qsub import qsub
 
 import os
 import time
@@ -75,6 +78,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
                         'optimizer_state_dict': loss_compute.opt.optimizer.state_dict()},
                         save_file)
                     last_saved = time.time()
+                    qsub(save_file)
         if i % 50 == 1:
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
@@ -88,7 +92,8 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
 
 def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_name=None):
-    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset, batch_size=4500)
+    bsz = 4000 if dataset == "cz" else 4500
+    train_iter, valid_iter, test_iter, train_idx, dev_idx, test_idx = get_training_iterators(dataset, batch_size=bsz)
     if config_name is None:
         config_name = "baseline"
     save_path = "checkpoints/" + dataset + "-" + config_name
