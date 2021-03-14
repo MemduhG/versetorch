@@ -111,6 +111,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         checkpoint = torch.load(last_file)
         model.load_state_dict(checkpoint['model_state_dict'])
         model_opt.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        model.steps = last.split(".")[0]
 
     device_count = torch.cuda.device_count()
     if device_count > 1:
