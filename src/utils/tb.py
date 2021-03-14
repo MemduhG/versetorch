@@ -34,7 +34,7 @@ for experiment in experiments:
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
             print("val/" + experiment, translation, bleu.score)
 
-        wall = os.stat(file_path).st_mtime
+        wall = os.stat(file_path).st_mtime - os.stat("checkpoints/{}/1.pt".format(experiment)).st_mtime
         writer.add_scalar(experiment, bleu.score, global_step=steps, walltime=wall)
 
 
