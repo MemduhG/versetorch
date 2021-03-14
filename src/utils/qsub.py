@@ -1,9 +1,12 @@
 import sys
-from subprocess import PIPE
-
+import subprocess
 src_files = {"cz-baseline": "data/cz/cz.dev.src",
              "eng-baseline": "data/en/eng.dev.src",
              "tur-baseline": "data/tr/tur.dev.src"}
+
+languages = {"cz-baseline": "cz",
+             "eng-baseline": "en",
+             "tur-baseline": "tr"}
 
 
 template_script = """#PBS -q gpu
@@ -25,12 +28,14 @@ $PYTHON src/utils/translate.py \
 --language {language} --max_len 256 --checkpoint {checkpoint} --output {output} --input {input}"""
 
 
-def qsub(save_path):
-    _, experiment, steps = save_path.split("/")
+def qsub(save_file):
+    _, experiment, steps = save_file.split("/")
+    steps = steps.partition(".")[0]
     input = src_files[experiment]
-    checkpoint = save_path
+    checkpoint = save_file
     output = "translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
-    new_script = template_script.format(input=input, checkpoint=checkpoint, output=output)
+    new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
+                                        language=languages[experiment])
     script_path = "~/.scratch/{}-{}.sh".format(experiment, steps)
     with open(script_path, "w", encoding="utf-8") as outfile:
         outfile.write(new_script)

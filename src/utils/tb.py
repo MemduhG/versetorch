@@ -33,7 +33,8 @@ for experiment in experiments:
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
             print("val/" + experiment, translation, bleu.score)
 
-    writer.add_scalar(experiment, bleu.score, steps)
+        writer.add_scalar(experiment, bleu.score, steps)
 
 
 writer.flush()
+writer.close()
