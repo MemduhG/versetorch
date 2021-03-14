@@ -36,7 +36,7 @@ def qsub(save_file):
     output = "translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
     new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
                                         language=languages[experiment])
-    script_path = "~/.scratch/{}-{}.sh".format(experiment, steps)
+    script_path = "/storage/plzen1/home/memduh/.scratch/{}-{}.sh".format(experiment, steps)
     with open(script_path, "w", encoding="utf-8") as outfile:
         outfile.write(new_script)
     subprocess.run(args=["qsub", script_path])
