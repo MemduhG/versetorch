@@ -78,7 +78,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
                         'optimizer_state_dict': loss_compute.opt.optimizer.state_dict()},
                         save_file)
                     last_saved = time.time()
-                    qsub(save_file)
+                    qsub(save_file, mod.steps)
         if i % 50 == 1:
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %

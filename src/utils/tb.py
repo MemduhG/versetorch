@@ -27,13 +27,15 @@ for experiment in experiments:
     for translation in sorted(os.listdir(exp_path), key=lambda x: int(x)):
         steps = int(translation)
         system_output = []
-        with open(os.path.join(exp_path, translation), "r", encoding="utf-8") as infile:
+        file_path = os.path.join(exp_path, translation)
+        with open(file_path, "r", encoding="utf-8") as infile:
             for line in infile:
                 system_output.append(line.strip())
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
             print("val/" + experiment, translation, bleu.score)
 
-        writer.add_scalar(experiment, bleu.score, steps)
+        wall = os.stat(file_path).st_mtime
+        writer.add_scalar(experiment, bleu.score, global_step=steps, walltime=wall)
 
 
 writer.flush()

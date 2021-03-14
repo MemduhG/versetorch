@@ -53,6 +53,9 @@ def translate_devset(args):
         for line in decoded:
             outfile.writelines(line + "\n")
 
+    checkpoint_time = os.stat(args.checkpoint).st_mtime
+    os.utime(save_to, (checkpoint_time, checkpoint_time))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

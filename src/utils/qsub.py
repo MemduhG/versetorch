@@ -28,9 +28,8 @@ $PYTHON src/utils/translate.py \
 --language {language} --max_len 256 --checkpoint {checkpoint} --output {output} --input {input}"""
 
 
-def qsub(save_file):
-    _, experiment, steps = save_file.split("/")
-    steps = steps.partition(".")[0]
+def qsub(save_file, steps):
+    _, experiment, _ = save_file.split("/")
     input = src_files[experiment]
     checkpoint = save_file
     output = "translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
