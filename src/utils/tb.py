@@ -2,10 +2,17 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import os
 import sacrebleu
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+from src.utils.rhyme import concurrent_score
 
 ref_files = {"cz-baseline": "data/cz/cz.dev.tgt",
              "eng-baseline": "data/en/eng.dev.tgt",
              "tur-baseline": "data/tr/tur.dev.tgt"}
+
+languages = {"cz-baseline": "cz", "eng-baseline": "en", "tur-baseline": "tr"}
 
 references = {}
 
@@ -32,10 +39,12 @@ for experiment in experiments:
             for line in infile:
                 system_output.append(line.strip())
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
+            rhyme_score = concurrent_score(system_output, languages[experiment])
             print("val/" + experiment, translation, bleu.score)
 
         wall = os.stat(file_path).st_mtime
-        writer.add_scalar(experiment, bleu.score, global_step=steps, walltime=wall)
+        writer.add_scalar(experiment + "/BLEU", bleu.score, global_step=steps, walltime=wall)
+        writer.add_scalar(experiment + "/Rhyme", rhyme_score, global_step=steps, walltime=wall)
 
 
 writer.flush()
