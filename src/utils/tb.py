@@ -40,7 +40,7 @@ for experiment in experiments:
                 system_output.append(line.strip())
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
             rhyme_score = concurrent_score(system_output, languages[experiment])
-            print("val/" + experiment, translation, bleu.score)
+            print(experiment, translation, bleu.score, rhyme_score)
 
         wall = os.stat(file_path).st_mtime
         writer.add_scalar(experiment + "/BLEU", bleu.score, global_step=steps, walltime=wall)
