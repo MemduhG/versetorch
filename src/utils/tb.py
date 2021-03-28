@@ -46,8 +46,7 @@ for experiment in experiments:
     src = sources[experiment]
     exp_path = os.path.join("translations", experiment)
     redif = "tur" in experiment
-    ref_ends = [set(get_verse_ends(r, redif)) for r in ref]
-    src_ends = [set(get_verse_ends(s, redif)) for s in src]
+
     num_lines = len(ref)
     for translation in sorted(os.listdir(exp_path), key=lambda x: int(x)):
         steps = int(translation)
@@ -55,20 +54,18 @@ for experiment in experiments:
         file_path = os.path.join(exp_path, translation)
         all_copied, all_recon = 0., 0.
         with open(file_path, "r", encoding="utf-8") as infile:
-            for line, src_line, ref_line in zip(infile.readlines(), src_ends, ref_ends):
-                system_output.append(line.strip())
-                copied, reconstructed = score_originality(rhyme_pairs, ref_line, src_line)
-                all_copied += copied / num_lines
-                all_recon += reconstructed / num_lines
+            system_output.append(line.strip())
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
-            rhyme_score, rhyme_pairs = concurrent_score(system_output, languages[experiment])
+            rhyme_score, copied, reconstructed = concurrent_score(system_output,
+                                                                  languages[experiment],
+                                                                  ref, src)
             print(experiment, translation, bleu.score, rhyme_score)
 
         wall = os.stat(file_path).st_mtime
         writer.add_scalar(experiment + "/BLEU", bleu.score, global_step=steps, walltime=wall)
         writer.add_scalar(experiment + "/Rhyme", rhyme_score, global_step=steps, walltime=wall)
-        writer.add_scalar(experiment + "/Copied", all_copied, global_step=steps, walltime=wall)
-        writer.add_scalar(experiment + "/Reconstructed", all_recon, global_step=steps, walltime=wall)
+        writer.add_scalar(experiment + "/Copied", copied, global_step=steps, walltime=wall)
+        writer.add_scalar(experiment + "/Reconstructed", reconstructed, global_step=steps, walltime=wall)
 
 writer.flush()
 writer.close()
