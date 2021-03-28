@@ -54,12 +54,12 @@ for experiment in experiments:
         file_path = os.path.join(exp_path, translation)
         all_copied, all_recon = 0., 0.
         with open(file_path, "r", encoding="utf-8") as infile:
-            system_output.append(line.strip())
+            system_output = [x.strip() for x in infile.readlines()]
             bleu = sacrebleu.corpus_bleu(system_output, [ref])
             rhyme_score, copied, reconstructed = concurrent_score(system_output,
                                                                   languages[experiment],
                                                                   ref, src)
-            print(experiment, translation, bleu.score, rhyme_score)
+            print(experiment, translation, bleu.score, rhyme_score, copied, reconstructed)
 
         wall = os.stat(file_path).st_mtime
         writer.add_scalar(experiment + "/BLEU", bleu.score, global_step=steps, walltime=wall)

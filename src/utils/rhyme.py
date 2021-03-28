@@ -208,18 +208,17 @@ def concurrent_score(lines, language, ref, src):
     src_ends = [set(get_verse_ends(s, redif)) for s in src]
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-        scores = executor.map(lambda x: critique_poem(x, language, redif), lines)
-
+        scores = list(executor.map(lambda x: critique_poem(x, language, redif), lines))
 
 
     rhyme_score = sum(x[0] for x in scores) / len(lines)
-    pairs = (x[1] for x in scores)
+    pairs = [x[1] for x in scores]
 
     pairs_and_ends = zip(pairs, ref_ends, src_ends)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
-        originalities = executor.map(lambda x: score_originality(x[0], x[1], x[2]),
-                                     pairs_and_ends)
+        originalities = list(executor.map(lambda x: score_originality(x[0], x[1], x[2]),
+                                     pairs_and_ends))
 
     copied = sum(x[0] for x in originalities) / len(lines)
     reconstructed = sum(x[1] for x in originalities) / len(lines)
@@ -247,7 +246,7 @@ def score_originality(rhyme_pairs, ref_ends, src_ends):
             src_pairs.add((first, second))
     all_pairs = len(rhyme_pairs)
     if all_pairs == 0:
-        return 0.
+        return [0., 0.]
     in_ref, in_src = 0, 0
     for pair in rhyme_pairs:
         a, b = pair
@@ -256,7 +255,7 @@ def score_originality(rhyme_pairs, ref_ends, src_ends):
             in_ref += 1
         if pair in src_ends or rev in src_pairs:
             in_src += 1
-    return in_src / all_pairs, in_ref / all_pairs
+    return [in_src / all_pairs, in_ref / all_pairs]
 
 
 if __name__ == "__main__":
