@@ -97,7 +97,7 @@ def critique_poem(poem, language, redif=False, return_pairs=False):
     ends = get_verse_ends(poem, redif)
     end_set = set(ends)
     if len(ends) == 0:
-        return 0.
+        return [0., set()]
     total_score = 0.
     seen_pairs = set()
     rhyme_pairs = set()
@@ -123,9 +123,7 @@ def critique_poem(poem, language, redif=False, return_pairs=False):
             rhyme_pairs.add(pair)
         total_score += max_score
     critique_score = total_score / len(ends)
-
     return critique_score, rhyme_pairs
-
 
 
 def rhyme_tr(first, second):
