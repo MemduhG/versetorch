@@ -31,7 +31,7 @@ for exp in ref_files:
 
 for exp in src_files:
     source = []
-    if exp not in references:
+    if exp not in sources:
         with open(src_files[exp], "r", encoding="utf-8") as infile:
             for line in infile:
                 source.append(line.strip())
