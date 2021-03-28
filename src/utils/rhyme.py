@@ -9,52 +9,6 @@ import re
 import concurrent.futures
 
 ts = TurkishStemmer()
-cache = dict()
-
-
-def stem_one(word):
-    stemmed = ts.stem(word)
-    if len(stemmed) < len(word):
-        remainder = word[len(stemmed):]
-        for symbol in "'′’´ʼ":
-            remainder = remainder.strip(symbol)
-            stemmed = stemmed.strip(symbol)
-        segmented = stemmed + "-" + remainder
-    else:
-        segmented = stemmed
-    text = [segmented]
-    return text
-
-
-def tr_stem(word, bin_loc="/home/memduh/git/TRmorph/segment.fst"):
-    if word in cache:
-        return cache[word]
-    if "3.6.2" in sys.version:
-        output = subprocess.run(args=["flookup", bin_loc], input=word.encode("utf-8"), stdout=PIPE)
-        text_output = output.stdout.decode("utf-8")
-        text = [line.split("\t")[1].rstrip() for line in text_output.rstrip().split("\n")]
-    else:
-        output = subprocess.run(args=["flookup", bin_loc], input=word, capture_output=True, text=True)
-        text = [line.split("\t")[1].rstrip() for line in output.stdout.rstrip().split("\n")]
-    text = [x for x in text if x[0] == x[0].lower()]
-    if text == ["+?"]:
-        text = stem_one(word)
-    filtered_voicing = list()
-    for item in text:
-        stem = item.split("-")[0]
-        if len(stem) > len(word):
-            continue
-        if stem[-1] == word[len(stem) - 1]:
-            filtered_voicing.append(item)
-    if len(filtered_voicing) != len(text) and len(filtered_voicing) > 0:
-        text = filtered_voicing
-    for symbol in "'′’´ʼ":
-        if symbol not in word:
-            text = [x for x in text if symbol not in x]
-    if len(text) == 0:
-        text = stem_one(word)
-    cache[word] = text
-    return text
 
 
 def compare_stems(first, second):
@@ -146,8 +100,10 @@ def critique_poem(poem, language, redif=False):
         return 0.
     total_score = 0.
     seen_pairs = set()
+    rhyme_pairs = set()
     for first in ends:
         max_score = 0.
+        pair = (first, first)
         for second in end_set.difference({first}):
             if (first, second) in seen_pairs or (second, first) in seen_pairs:
                 continue
@@ -158,15 +114,19 @@ def critique_poem(poem, language, redif=False):
                 new_score = 0.
             if new_score > max_score:
                 max_score = new_score
+                pair = (first, second)
             if new_score == 1:
+                max_score = 1
+                pair = (first, second)
                 break
+        if max_score > 0.:
+            rhyme_pairs.add(pair)
         total_score += max_score
     critique_score = total_score / len(ends)
-    return critique_score
+    return critique_score, rhyme_pairs
 
 
 def rhyme_tr(first, second):
-    # TODO: figure out till where the rhyme is.
     if " " in first and " " in second:
         first_list, second_list = first.split(" "), second.split(" ")
         while first_list[-1] == second_list[-1]:
@@ -198,7 +158,6 @@ def works(first, second, end=False):
     if f == s:
         return True
     elif end == True:
-
         if f in devoc:
             if devoc[f] == s:
                 return True
@@ -222,7 +181,6 @@ def rhyme_length(first, second):
             length += 1
         else:
             break
-
     return length
 
 
@@ -241,24 +199,8 @@ def rhyme_cz(first, second):
         return 0
 
 
-def find_syll_sep(lines):
-    candidates = ["-", "/"]
-    for line in lines[:min(5, len(lines))]:
-        for candidate in candidates:
-            if re.search("\w" + candidate + "\w", line) is None:
-                candidates.remove(candidate)
-    if len(candidates) > 0:
-        return candidates[0]
-    else:
-        return None
-
-
-def concurrent_score(lines, language, syll_sep=None):
+def concurrent_score(lines, language):
     threads = min(MAX_THREADS, len(lines))
-    if syll_sep is None:
-        syll_sep = find_syll_sep(lines)
-    if syll_sep is not None:
-        lines = [re.sub(syll_sep, "", x) for x in lines]
     redif = True if language == "tr" else False
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
@@ -276,6 +218,28 @@ def score_file(fname, language):
 def score_stdin(language):
     import sys
     return concurrent_score(sys.stdin.readlines(), language)
+
+
+def score_originality(rhyme_pairs, ref_ends, src_ends):
+    ref_pairs, src_pairs = set(), set()
+    for first in ref_ends:
+        for second in ref_ends:
+            ref_pairs.add((first, second))
+    for first in src_ends:
+        for second in src_ends:
+            src_pairs.add((first, second))
+    all_pairs = len(rhyme_pairs)
+    if all_pairs == 0:
+        return 0.
+    in_ref, in_src = 0, 0
+    for pair in rhyme_pairs:
+        a, b = pair
+        rev = (b, a)
+        if pair in ref_ends or rev in ref_pairs:
+            in_ref += 1
+        if pair in src_ends or rev in src_pairs:
+            in_src += 1
+    return in_src / all_pairs, in_ref / all_pairs
 
 
 if __name__ == "__main__":

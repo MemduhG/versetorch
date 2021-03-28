@@ -45,8 +45,8 @@ six==1.15.0
 tensorboard==2.4.1
 tensorboard-plugin-wit==1.8.0
 tokenizers==0.10.1
-torch==1.7.0
-torchtext==0.8.0
+torch==1.7.1
+torchtext
 tqdm==4.51.0
 transformers==4.3.2
 typing-extensions==3.7.4.3
