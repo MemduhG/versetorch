@@ -1,6 +1,4 @@
-#PBS -q gpu
-#PBS -l select=1:ncpus=1:ngpus=1:mem=10gb:scratch_local=10gb:cl_adan=True
-#PBS -l walltime=4:00:00 
+#PBS -l select=1:ncpus=4:mem=10gb:scratch_local=10gb:cl_adan=True
 #PBS -j oe
 
 module add python-3.6.2-gcc
@@ -10,7 +8,10 @@ module add cudnn-7.0
 
 cd $PBS_O_WORKDIR
 
+rm -rf runs
 source scripts/venv.sh
 export PYTHONPATH=/storage/plzen1/home/memduh/versetorch/venv/
 export PYTHON=/storage/plzen1/home/memduh/versetorch/venv/bin/python
-$PYTHON src/utils/translate.py \
+$PYTHON -m pip install tensorboard TurkishStemmer pronouncing
+$PYTHON src/utils/tb.py
+

@@ -1,6 +1,6 @@
 #!/bin/bash -v
 #PBS -q gpu
-#PBS -N versetorch
+#PBS -N vt-tr
 #PBS -l select=1:ncpus=2:ngpus=1:mem=20gb:scratch_local=10gb:cl_adan=True
 #PBS -l walltime=24:00:00 
 #PBS -j oe
@@ -15,4 +15,4 @@ cd $PBS_O_WORKDIR
 source scripts/venv.sh
 export PYTHONPATH=/storage/plzen1/home/memduh/versetorch/venv/
 export PYTHON=/storage/plzen1/home/memduh/versetorch/venv/bin/python
-$PYTHON src/train/train_baseline.py
+$PYTHON src/train/train_baseline.py --dataset tur
