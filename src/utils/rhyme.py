@@ -223,6 +223,26 @@ def concurrent_score(lines, language, ref, src):
     return rhyme_score, copied, reconstructed
 
 
+def score_prose_translation(lines, language, src):
+    threads = min(MAX_THREADS, len(lines))
+    redif = True if language == "tr" else False
+    src_ends = [set(get_verse_ends(s, redif)) for s in src]
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+        scores = list(executor.map(lambda x: critique_poem(x, language, redif), lines))
+
+    pairs = [x[1] for x in scores]
+    rhyme_score = sum(x[0] for x in scores) / len(lines)
+    tuples = zip(pairs, src_ends)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=threads) as executor:
+        copied = list(executor.map(lambda x: copied_percentage(x[0], x[1]), tuples))
+
+    copied_score = sum(x for x in copied) / len(lines)
+
+    return rhyme_score, copied_score
+
+
 def score_file(fname, language):
     with open(fname, encoding="utf-8") as infile:
         lines = infile.readlines()
@@ -254,6 +274,23 @@ def score_originality(rhyme_pairs, ref_ends, src_ends):
         if pair in src_ends or rev in src_pairs:
             in_src += 1
     return [in_src / all_pairs, in_ref / all_pairs]
+
+
+def copied_percentage(rhyme_pairs, src_ends):
+    src_pairs = set()
+    for first in src_ends:
+        for second in src_ends:
+            src_pairs.add((first, second))
+    all_pairs = len(rhyme_pairs)
+    if all_pairs == 0:
+        return 0.
+    in_ref, in_src = 0, 0
+    for pair in rhyme_pairs:
+        a, b = pair
+        rev = (b, a)
+        if pair in src_ends or rev in src_pairs:
+            in_src += 1
+    return in_src / all_pairs
 
 
 if __name__ == "__main__":
