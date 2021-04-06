@@ -50,7 +50,7 @@ torchtext
 tqdm==4.51.0
 transformers==4.3.2
 typing-extensions==3.7.4.3
-urllib3==1.26.2
+urllib3==1.26.4
 Werkzeug==1.0.1
 zipp==3.4.0
 TurkishStemmer==1.3
