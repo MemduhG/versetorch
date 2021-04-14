@@ -1,6 +1,6 @@
 #!/bin/bash -v
 #PBS -q gpu
-#PBS -N vt-tr
+#PBS -N jupyter
 #PBS -m b
 #PBS -l select=1:ncpus=2:ngpus=1:mem=20gb:scratch_local=10gb:cl_adan=True
 #PBS -l walltime=24:00:00 
