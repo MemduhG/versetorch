@@ -2,11 +2,18 @@ import sys
 import subprocess
 src_files = {"cz-baseline": "data/cz/cz.dev.src",
              "eng-baseline": "data/en/eng.dev.src",
-             "tur-baseline": "data/tr/tur.dev.src"}
+             "tur-baseline": "data/tr/tur.dev.src",
+             "cz-acc": "data/cz/cz.dev.src",
+             "eng-acc": "data/en/eng.dev.src",
+             "tur-acc": "data/tr/tur.dev.src"}
+
 
 languages = {"cz-baseline": "cz",
              "eng-baseline": "en",
-             "tur-baseline": "tr"}
+             "tur-baseline": "tr",
+             "cz-acc": "cz",
+             "eng-acc": "en",
+             "tur-acc": "tr"}
 
 
 template_script = """#PBS -q gpu
