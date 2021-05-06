@@ -28,6 +28,7 @@ module add cudnn-7.0
 
 cd $PBS_O_WORKDIR
 
+mkdir -p {folder}
 source scripts/venv.sh
 export PYTHONPATH=/storage/plzen1/home/memduh/versetorch/venv/
 export PYTHON=/storage/plzen1/home/memduh/versetorch/venv/bin/python
@@ -39,9 +40,10 @@ def qsub(save_file, steps):
     _, experiment, _ = save_file.split("/")
     input = src_files[experiment]
     checkpoint = save_file
+    folder = "translations/{experiment}/".format(experiment=experiment)
     output = "translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
     new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
-                                        language=languages[experiment])
+                                        language=languages[experiment], folder=folder)
     script_path = "/storage/plzen1/home/memduh/.scratch/{}-{}.sh".format(experiment, steps)
     with open(script_path, "w", encoding="utf-8") as outfile:
         outfile.write(new_script)

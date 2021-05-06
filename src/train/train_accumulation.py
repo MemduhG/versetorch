@@ -42,10 +42,11 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
         x = model.generator(out)
         loss = criterion(x.contiguous().view(-1, x.size(-1)), batch.trg_y.to(device).contiguous().view(-1)) / batch.ntokens
-        loss.backward()
-        if i% acc_steps == 0:
-            model_opt.step()
-            model_opt.optimizer.zero_grad()
+        if model_opt is not None:
+            loss.backward()
+            if i % acc_steps == 0:
+                model_opt.step()
+                model_opt.optimizer.zero_grad()
         total_loss += float(loss)
         del out
         ntokens = batch.ntokens
@@ -111,9 +112,10 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         model.train()
         run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, tokenizer, model_opt=model_opt,
                   criterion=criterion, save_path=save_path)
-        model.eval()
-        loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer, validate=True)
-        print(loss)
+        #model.eval()
+        #loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer,
+        #                 criterion=criterion, validate=True)
+        #print(loss)
 
 
 if __name__ == "__main__":
