@@ -5,7 +5,10 @@ src_files = {"cz-baseline": "data/cz/cz.dev.src",
              "tur-baseline": "data/tr/tur.dev.src",
              "cz-acc": "data/cz/cz.dev.src",
              "eng-acc": "data/en/eng.dev.src",
-             "tur-acc": "data/tr/tur.dev.src"}
+             "tur-acc": "data/tr/tur.dev.src",
+             "cz-dae": "data/cz/cz.dev.tgt",
+             "eng-dae": "data/en/eng.dev.tgt",
+             "tur-dae": "data/tr/tur.dev.tgt"}
 
 
 languages = {"cz-baseline": "cz",
@@ -32,7 +35,7 @@ mkdir -p {folder}
 source scripts/venv.sh
 export PYTHONPATH=/storage/plzen1/home/memduh/versetorch/venv/
 export PYTHON=/storage/plzen1/home/memduh/versetorch/venv/bin/python
-$PYTHON src/utils/translate.py \
+$PYTHON src/utils/{script}.py \
 --language {language} --max_len 256 --checkpoint {checkpoint} --output {output} --input {input}"""
 
 
@@ -40,10 +43,11 @@ def qsub(save_file, steps):
     _, experiment, _ = save_file.split("/")
     input = src_files[experiment]
     checkpoint = save_file
+    script = "translate_dae" if "dae" in experiment else "translate"
     folder = "translations/{experiment}/".format(experiment=experiment)
     output = "translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
     new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
-                                        language=languages[experiment], folder=folder)
+                                        language=languages[experiment], folder=folder, script=script)
     script_path = "/storage/plzen1/home/memduh/.scratch/{}-{}.sh".format(experiment, steps)
     with open(script_path, "w", encoding="utf-8") as outfile:
         outfile.write(new_script)

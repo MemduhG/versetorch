@@ -63,7 +63,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
                     save_file = save_path + "/" + str(model.steps) + ".pt"
                     torch.save({
                         'model_state_dict': model.state_dict(),
-                        'optimizer_state_dict': loss_compute.opt.optimizer.state_dict()},
+                        'optimizer_state_dict': model_opt.optimizer.state_dict()},
                         save_file)
                     last_saved = time.time()
                     if torch.cuda.is_available():
