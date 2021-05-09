@@ -16,7 +16,11 @@ languages = {"cz-baseline": "cz",
              "tur-baseline": "tr",
              "cz-acc": "cz",
              "eng-acc": "en",
-             "tur-acc": "tr"}
+             "tur-acc": "tr",
+             "cz-dae": "cz",
+             "eng-dae": "en",
+             "tur-dae": "tr"
+             }
 
 
 template_script = """#PBS -q gpu
