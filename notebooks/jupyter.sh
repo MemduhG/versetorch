@@ -2,8 +2,8 @@
 #PBS -q gpu
 #PBS -N jupyter
 #PBS -m b
-#PBS -l select=1:ncpus=2:ngpus=1:mem=20gb:scratch_local=10gb:cl_adan=True
-#PBS -l walltime=6:00:00 
+#PBS -l select=1:ncpus=4:ngpus=2:mem=20gb:scratch_local=10gb:cl_adan=True
+#PBS -l walltime=8:00:00 
 #PBS -j oe
 
 module add python-3.6.2-gcc
