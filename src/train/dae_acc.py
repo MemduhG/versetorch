@@ -170,8 +170,8 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         last = sorted(os.listdir(save_path), reverse=True, key=lambda x: int(x.partition(".")[0]))[0]
         last_file = os.path.join(save_path, last)
         checkpoint = torch.load(last_file)
-        model.load_state_dict(checkpoint['selector_state_dict'])
-        model.load_state_dict(checkpoint['selector_optim_state_dict'])
+        token_selector.load_state_dict(checkpoint['selector_state_dict'])
+        token_optim.load_state_dict(checkpoint['selector_optim_state_dict'])
         model.load_state_dict(checkpoint['model_state_dict'])
         model_opt.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         model.steps = int(last.split(".")[0])
