@@ -17,7 +17,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def translate_devset(args):
     save_to = args.output
-    token_selector = make_critic(32000, 2).to(device)
+    token_selector = (32000, 2, 2).to(device)
     model = make_model(32000, 32000, N=6).to(device)
     try:
         checkpoint = torch.load(args.checkpoint)
