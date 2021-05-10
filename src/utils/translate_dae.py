@@ -24,7 +24,7 @@ def translate_devset(args):
     except RuntimeError:
         checkpoint = torch.load(args.checkpoint, map_location = torch.device('cpu'))
     model.load_state_dict(checkpoint['model_state_dict'])
-    token_selector.load_state_dict(checkpoint['token_selector_dict'])
+    token_selector.load_state_dict(checkpoint['selector_state_dict'])
     token_selector.eval()
     model.eval()
     tokenizer = get_tokenizer(args.language)
