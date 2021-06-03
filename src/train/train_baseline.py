@@ -13,6 +13,7 @@ from src.model.model import make_model, NoamOpt, LabelSmoothing, translate_sente
 from src.utils.utils import get_tokenizer
 from src.utils.qsub import qsub
 
+from torch.utils.tensorboard import SummaryWriter
 import os
 import time
 import torch
@@ -21,8 +22,10 @@ from torch import nn
 t = time.time()
 last_saved = t
 
+writer = SummaryWriter()
 
-def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False, criterion=None, model_opt=None):
+def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, 
+validate=False, criterion=None, model_opt=None, exp_name=None):
     """Standard Training and Logging Function"""
     global t, last_saved
     start = time.time()
@@ -33,15 +36,9 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         mod = model.module
     else:
         mod = model
-    def sanity_check():
-        translate_sentence(mod, sent="Hak yoluna gidenleriz.", tokenizer=tokenizer)
-    # sanity_check()
     for i, batch in enumerate(data_iter):
         if validate is False:
             model.train()
-        # out = model.forward(batch.src.to("cuda:0"), batch.trg.to("cuda:0"),
-        #                     batch.src_mask.to("cuda:0"), batch.trg_mask.to("cuda:0"))
-        # loss = loss_compute(out, batch.trg_y.to("cuda:0"), batch.ntokens)
         print(batch.src.shape, batch.trg.shape)
         if torch.cuda.device_count() == 1:
             try:
@@ -59,7 +56,9 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
         else:
             loss = loss_compute(out, batch.trg_y, batch.ntokens)
 
-        total_loss += float(loss)  # this might be the problem
+        writer.add_scalar(exp_name + "/Loss", float(loss) , global_step=model.steps)
+        writer.add_scalar(exp_name + "/Learning Rate", loss_compute.opt._rate, global_step=model.steps)
+        total_loss += float(loss) 
         del out
         ntokens = batch.ntokens
         total_tokens += ntokens
@@ -84,6 +83,7 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
                   (i, loss / ntokens, tokens / elapsed))
             # sanity_check()
+            writer.flush()
             start = time.time()
             tokens = 0
         del loss
@@ -97,6 +97,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
     if config_name is None:
         config_name = "baseline"
     save_path = "checkpoints/" + dataset + "-" + config_name
+    exp_name = dataset + "-" + config_name
     pad_idx = 3
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = make_model(vocab_size, vocab_size, N=6).to(device)
@@ -111,7 +112,9 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         checkpoint = torch.load(last_file)
         model.load_state_dict(checkpoint['model_state_dict'])
         model_opt.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        model.steps = int(last.split(".")[0])
+        steps = int(last.split(".")[0])
+        model_opt._step = steps
+        model.steps = steps
 
     device_count = torch.cuda.device_count()
     if device_count > 1:
@@ -136,10 +139,8 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
         loss_val = SimpleLossCompute(model.generator, criterion, None)
         for epoch in range(epochs):
             model.train()
-            run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, tokenizer, save_path=save_path)
-            model.eval()
-            loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer, validate=True)
-            print(loss)
+            run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, 
+            tokenizer, save_path=save_path, exp_name=exp_name)
 
 
 if __name__ == "__main__":

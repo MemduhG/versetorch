@@ -6,3 +6,11 @@ src/.data
 src/s2s.py
 *.pt
 *.[eo][0-9]*
+*.src
+*.tgt
+.data/
+.ipynb_checkpoints/
+__pycache__
+translations/
+checkpoints/
+prose_translations/

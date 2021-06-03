@@ -30,7 +30,7 @@ input=data/$language/prose.txt
 for item in `ls $folder`;
 do
 	steps=`echo $item | cut -f1 -d "."`
-	script=~/.scratch/$prose-steps-$$.sh
+	script=~/.scratch/$language-pr-$steps-.sh
 	checkpoint=$folder/$item
 	output=$out_dir/$steps
     if [ -f $output ];

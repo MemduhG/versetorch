@@ -1,4 +1,4 @@
-#PBS -l select=1:ncpus=4:mem=10gb:scratch_local=10gb:cl_adan=True
+#PBS -l select=1:ncpus=4:mem=10gb:scratch_local=10gb
 #PBS -j oe
 
 module add python-3.6.2-gcc

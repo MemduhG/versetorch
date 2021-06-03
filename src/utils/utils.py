@@ -1,7 +1,7 @@
 import sentencepiece as spm
 import sacrebleu
 
-tokenizer_data_files = {"tr": "data/spm/tr.txt", "cz": "data/spm/cz.txt", "en": "data/spm/en.txt"}
+tokenizer_data_files = {"tr": "data/tr/prose/prose_gan.txt", "cz": "data/spm/cz.txt", "en": "data/spm/en.txt"}
 tokenizer_model_paths = {"tr": "data/spm/tr.model", "cz": "data/spm/cz.model", "en": "data/spm/en.model"}
 
 dataset_to_tok = {"antoloji": "tr", "tur": "tr"}
