@@ -14,3 +14,7 @@ __pycache__
 translations/
 checkpoints/
 prose_translations/
+runs/
+news_translations/
+*.sh.o*
+*.txt

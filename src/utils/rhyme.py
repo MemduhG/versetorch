@@ -185,16 +185,23 @@ def rhyme_length(first, second):
 
 
 def rhyme_cz(first, second):
+    """
+    noc ulitsa fonar  aptesta
+
+    zivi jesho xot chetvert vesta
+    """"
     clean_first, clean_second = first, second
     for sign in "∶‖…":
         clean_first, clean_second = clean_first.replace(sign, " "), clean_second.replace(sign, " ")
-    if rhyme_length(first, second) > 1:
-        return 1
-    elif rhyme_length(first, second) == 1:
+    length = rhyme_length(first, second)
+    if length > 1:
         if simplify(first[-1]) in "aeiou":
-            return 1
-        else:
+            for letter in simplify(first)[-length:-1]:
+                if letter in "aeiou":
+                    return 1
             return 0
+        else:
+            return 1
     else:
         return 0
 

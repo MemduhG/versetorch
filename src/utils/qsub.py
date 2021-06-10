@@ -11,6 +11,17 @@ src_files = {"cz-baseline": "data/cz/cz.dev.src",
              "tur-dae": "data/tr/tur.dev.tgt"}
 
 
+news_files = {"cz-baseline": "data/cz/prose.txt",
+             "eng-baseline": "data/en/prose.txt",
+             "tur-baseline": "data/tr/prose.txt",
+             "cz-acc": "data/cz/prose.txt",
+             "eng-acc": "data/en/prose.txt",
+             "tur-acc": "data/tr/prose.txt",
+             "cz-dae": "data/cz/prose.txt",
+             "eng-dae": "data/en/prose.txt",
+             "tur-dae": "data/tr/prose.txt"}
+
+
 languages = {"cz-baseline": "cz",
              "eng-baseline": "en",
              "tur-baseline": "tr",
@@ -53,6 +64,19 @@ def qsub(save_file, steps):
     new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
                                         language=languages[experiment], folder=folder, script=script)
     script_path = "/storage/plzen1/home/memduh/.scratch/{}-{}.sh".format(experiment, steps)
+    with open(script_path, "w", encoding="utf-8") as outfile:
+        outfile.write(new_script)
+    subprocess.run(args=["qsub", script_path])
+
+    _, experiment, _ = save_file.split("/")
+    input = news_files[experiment]
+    checkpoint = save_file
+    script = "translate_dae" if "dae" in experiment else "translate"
+    folder = "prose_translations/{experiment}/".format(experiment=experiment)
+    output = "prose_translations/{experiment}/{steps}".format(experiment=experiment, steps=steps)
+    new_script = template_script.format(input=input, checkpoint=checkpoint, output=output,
+                                        language=languages[experiment], folder=folder, script=script)
+    script_path = "/storage/plzen1/home/memduh/.scratch/{}-{}-prose.sh".format(experiment, steps)
     with open(script_path, "w", encoding="utf-8") as outfile:
         outfile.write(new_script)
     subprocess.run(args=["qsub", script_path])
