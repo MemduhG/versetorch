@@ -2,6 +2,7 @@ import argparse
 import torch
 import sys
 import os
+from torch.utils.tensorboard import SummaryWriter
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -11,6 +12,7 @@ from src.data_utils.data import make_val_iterator
 from src.model.model import make_model, greedy_decode
 from src.utils.utils import get_tokenizer
 from src.train.dae_acc import make_critic, get_dae_input
+from src.utils.tb import get_files, write_prose_evals, write_evals
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -74,3 +76,19 @@ if __name__ == "__main__":
     parser.add_argument("--max_len", type=int, required=True)
     args = parser.parse_args()
     translate_devset(args)
+    _, experiment, checkpoint_name = args.checkpoint.split("/")
+    translation = checkpoint_name.partition(".pt")[0]
+    writer = SummaryWriter()
+    references, sources, prose_sources = get_files()
+    ref = references[experiment]
+    src = sources[experiment]
+    prose_src = prose_sources[experiment]
+    if "prose" not in args.output:
+        file_path = "translations/{}/{}".format(experiment, translation)
+        write_evals(writer, experiment, translation, file_path, ref, src)
+    else:
+        file_path = "prose_translations/{}/{}".format(experiment, translation)
+        write_prose_evals(writer, experiment, translation, file_path, prose_src)
+
+    writer.flush()
+    writer.close()

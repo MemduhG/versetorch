@@ -39,7 +39,6 @@ validate=False, criterion=None, model_opt=None, exp_name=None):
     for i, batch in enumerate(data_iter):
         if validate is False:
             model.train()
-        print(batch.src.shape, batch.trg.shape)
         if torch.cuda.device_count() == 1:
             try:
                 out = model.forward(batch.src.to("cuda"), batch.trg.to("cuda"),

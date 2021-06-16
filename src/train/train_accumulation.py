@@ -17,13 +17,15 @@ import os
 import time
 import torch
 from torch import nn
+from torch.utils.tensorboard import SummaryWriter
 
 t = time.time()
 last_saved = t
+writer = SummaryWriter()
 
 
 def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validate=False,
-              criterion=None, model_opt=None, acc_steps=8):
+              criterion=None, model_opt=None, acc_steps=8, exp_name=None):
     """Standard Training and Logging Function"""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     global t, last_saved
@@ -32,7 +34,6 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
     total_loss = 0
     tokens = 0
     for i, batch in enumerate(data_iter):
-        print(batch.src.shape, batch.trg.shape)
         try:
             out = model.forward(batch.src.to(device), batch.trg.to(device),
                              batch.src_mask.to(device), batch.trg_mask.to(device))
@@ -42,6 +43,9 @@ def run_epoch(data_iter, model, loss_compute, tokenizer, save_path=None, validat
 
         x = model.generator(out)
         loss = criterion(x.contiguous().view(-1, x.size(-1)), batch.trg_y.to(device).contiguous().view(-1)) / batch.ntokens
+        
+        writer.add_scalar(exp_name + "/Loss", float(loss) , global_step=model.steps)
+        writer.add_scalar(exp_name + "/Learning Rate", loss_compute.opt._rate, global_step=model.steps)
         if model_opt is not None:
             loss.backward()
             if i % acc_steps == 0:
@@ -86,6 +90,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
     if config_name is None:
         config_name = "acc"
     save_path = "checkpoints/" + dataset + "-" + config_name
+    exp_name = dataset + "-" + config_name
     pad_idx = 3
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = make_model(vocab_size, vocab_size, N=6).to(device)
@@ -111,7 +116,7 @@ def run_training(dataset, tokenizer, epochs=1000000, vocab_size=32000, config_na
     for epoch in range(epochs):
         model.train()
         run_epoch((rebatch(pad_idx, b) for b in train_iter), model, loss_train, tokenizer, model_opt=model_opt,
-                  criterion=criterion, save_path=save_path)
+                  criterion=criterion, save_path=save_path, exp_name=exp_name)
         #model.eval()
         #loss = run_epoch((rebatch(pad_idx, b) for b in valid_iter), model, loss_val, tokenizer,
         #                 criterion=criterion, validate=True)
@@ -123,7 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataset", default="tur")
     parser.add_argument("--acc_steps", default=8)
     args = parser.parse_args()
-    dataset_lang = {"tur": "tr", "eng": "en", "cz": "cz"}
+    dataset_lang = {"tur": "tr", "eng": "en", "cz": "cz", "tur-lower": "tr", "eng-lower": "en", "cz-lower": "cz"}
     tokenizer = get_tokenizer(dataset_lang[args.dataset])
     run_training(args.dataset, tokenizer, args.acc_steps)
 

@@ -8,7 +8,10 @@ src_files = {"cz-baseline": "data/cz/cz.dev.src",
              "tur-acc": "data/tr/tur.dev.src",
              "cz-dae": "data/cz/cz.dev.tgt",
              "eng-dae": "data/en/eng.dev.tgt",
-             "tur-dae": "data/tr/tur.dev.tgt"}
+             "tur-dae": "data/tr/tur.dev.tgt",
+             "cz-lower": "data/cz/cz-lower.dev.src",
+             "eng-lower": "data/en/eng-lower.dev.src",
+             "tur-lower": "data/tr/tur-lower.dev.src"}
 
 
 news_files = {"cz-baseline": "data/cz/prose.txt",
@@ -19,7 +22,10 @@ news_files = {"cz-baseline": "data/cz/prose.txt",
              "tur-acc": "data/tr/prose.txt",
              "cz-dae": "data/cz/prose.txt",
              "eng-dae": "data/en/prose.txt",
-             "tur-dae": "data/tr/prose.txt"}
+             "tur-dae": "data/tr/prose.txt",
+             "cz-lower": "data/cz/prose-lower.txt",
+             "eng-lower": "data/en/prose-lower.txt",
+             "tur-lower": "data/tr/prose-lower.txt"}
 
 
 languages = {"cz-baseline": "cz",
@@ -30,7 +36,10 @@ languages = {"cz-baseline": "cz",
              "tur-acc": "tr",
              "cz-dae": "cz",
              "eng-dae": "en",
-             "tur-dae": "tr"
+             "tur-dae": "tr",
+             "cz-lower": "cz",
+             "eng-lower": "en",
+             "tur-lower": "tr"
              }
 
 

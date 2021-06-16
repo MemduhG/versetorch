@@ -18,12 +18,14 @@ import os
 import time
 import torch
 from torch import nn
+from torch.utils.tensorboard import SummaryWriter
 
 import copy
 from src.model.model import MultiHeadedAttention, PositionwiseFeedForward, \
     PositionalEncoding, Encoder, EncoderLayer, Generator, Embeddings
 import torch.nn as nn
 
+writer = SummaryWriter()
 
 class Critic(nn.Module):
 
@@ -90,7 +92,6 @@ def run_epoch(data_iter, model, token_selector, loss_compute, tokenizer, token_o
     total_loss = 0
     tokens = 0
     for i, batch in enumerate(data_iter):
-        print(batch.src.shape, batch.trg.shape)
         try:
             tgt, tgt_mask = batch.trg.to(device), batch.trg_mask.to(device)
             # classify tokens, get the first 15 tokens selected.
@@ -109,6 +110,8 @@ def run_epoch(data_iter, model, token_selector, loss_compute, tokenizer, token_o
                                               batch.trg_y.to(device).contiguous().view(
                                                   -1)) / batch.ntokens
 
+        writer.add_scalar(exp_name + "/Loss", float(reconstruction_loss) , global_step=model.steps)
+        writer.add_scalar(exp_name + "/Learning Rate", loss_compute.opt._rate, global_step=model.steps)
         if model_opt is not None:
             reconstruction_loss.backward()
             if i % acc_steps == 0:

@@ -91,12 +91,14 @@ def write_evals(writer, experiment, translation, file_path, ref, src):
     with open(output_path, "r", encoding="utf-8") as infile:
         system_output = [x.strip() for x in infile.readlines()]
         bleu = sacrebleu.corpus_bleu(system_output, [ref])
+        chrf = sacrebleu.corpus_chrf(system_output, [ref])
         rhyme_score, copied, reconstructed = concurrent_score(system_output,
                                                                 languages[experiment],
                                                                 ref, src)
         print(experiment, translation, bleu.score, rhyme_score, copied, reconstructed)
 
     wall = os.stat(file_path).st_mtime
+    writer.add_scalar(experiment + "/CHRF", chrf.score, global_step=steps, walltime=wall)
     writer.add_scalar(experiment + "/BLEU", bleu.score, global_step=steps, walltime=wall)
     writer.add_scalar(experiment + "/Rhyme", rhyme_score, global_step=steps, walltime=wall)
     writer.add_scalar(experiment + "/Copied", copied, global_step=steps, walltime=wall)

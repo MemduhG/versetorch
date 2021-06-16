@@ -185,11 +185,6 @@ def rhyme_length(first, second):
 
 
 def rhyme_cz(first, second):
-    """
-    noc ulitsa fonar  aptesta
-
-    zivi jesho xot chetvert vesta
-    """"
     clean_first, clean_second = first, second
     for sign in "∶‖…":
         clean_first, clean_second = clean_first.replace(sign, " "), clean_second.replace(sign, " ")

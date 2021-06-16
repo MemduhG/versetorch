@@ -53,8 +53,9 @@ def file_register(dataset):
     test_indices = {tuple(item): c for c, item in enumerate(test)}
 
 
-def get_dataset(dataset):
-    languages = {"antoloji": "tr", "tur": "tr", "cz": "cz", "turkish": "tr", "eng": "en"}
+def get_dataset(dataset):  
+    languages = {"antoloji": "tr", "tur": "tr", "cz": "cz", "turkish": "tr", "eng": "en",
+                    "tur-lower": "tr", "cz-lower": "cz", "turkish-lower": "tr", "eng-lower": "en"}
     language = languages[dataset]
     tokenizer = get_tokenizer(language)
 
